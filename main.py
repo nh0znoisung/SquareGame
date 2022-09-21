@@ -1,7 +1,11 @@
 
+from re import S
 from config import conf
 import random
 import pygame
+
+#----Player----
+from Player import Player
 
 pygame.init()
 
@@ -48,7 +52,7 @@ class Game:
 			# Create groups
 			self.sprites = sprites.SpriteGroup()
 			self.enemies = sprites.SpriteGroup()
-			self.player = sprites.PlayerGroup()
+			#self.player = sprites.PlayerGroup()
 			
 			sound.play("music", -1)
 			print(conf.sound)
@@ -56,6 +60,7 @@ class Game:
 			# Returns false on game over
 			while self.play():
 				pass
+				
 			
 			sound.stop("music")
 	 
@@ -64,13 +69,13 @@ class Game:
 		''' Returns false on game over, true on end of level'''
 
 		self.background = lib.draw_background()
-		self.spawn_player()
+		self.hasSpawnPlayer = False
 		
 		self.playermoves = {
 			'right':False,
 			'left': False
 		}
-		
+  
 		while True:
 			
 			for event in pygame.event.get():
@@ -92,15 +97,9 @@ class Game:
 					# TODO
 					pass
 			
-			self.draw()
-			player = self.player.sprite
-					
-			if player:
-				if self.playermoves['left']:
-					self.player.left()
-				if self.playermoves['right']:
-					self.player.right()
+			self.draw()				
 			
+			'''
 			# Player -> enemy collisions
 			if player :
 				for enemy in pygame.sprite.spritecollide(player, self.enemies, False):
@@ -114,6 +113,7 @@ class Game:
 				x_pos = random.randint(0, WIDTH - 1)
 				y_pos = random.randint(0, HEIGHT - 1)
 				sprites.Enemy((x_pos,y_pos))
+    		'''
 
 
 	def draw(self):
@@ -121,16 +121,27 @@ class Game:
 		
 		self.screen.blit(self.background, (0, 0))
 		
-		self.sprites.update()
+  		#Player
+		if not self.hasSpawnPlayer:
+			self.Player = Player(self.screen, 100, 450, 300)
+			self.hasSpawnPlayer = True
+			self.getTicksLastFrame = 0
+		else:
+			self.Player.Update(self.GetDeltaTime(), self.screen, self.playermoves)
+		
+  		#self.sprites.update()
 		self.sprites.draw(self.screen)
 		
 		pygame.display.update()
 		self.clock.tick(FRAME_RATE)
-
-
-	def spawn_player(self):
-		sprites.Player((WIDTH/2, HEIGHT/2))
 	
+
+	def GetDeltaTime(self):
+		t = pygame.time.get_ticks()
+		deltaTime = (t - self.getTicksLastFrame) / 1000.0
+		self.getTicksLastFrame = t
+		return deltaTime
+ 
 
 if __name__ == '__main__':    
 	Game().begin()
