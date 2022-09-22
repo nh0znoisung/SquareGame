@@ -127,7 +127,7 @@ class Game:
 	def generate_square(self):
 		# TODO
 		# setup level
-		self.square_list.append(Square(size = [50,50], pos = [random.randint(0, WIDTH),random.randint(0, HEIGHT_UPPER_BOUND_SQUARE)], vector=[random.uniform(0, 1),random.uniform(0, 1)], speed=random.randint(0,10)))
+		self.square_list.append(Square(size = [50,50], pos = [random.randint(0, WIDTH),random.randint(0, HEIGHT_UPPER_BOUND_SQUARE)], vector=[random.uniform(0, 1),random.uniform(0, 1)], speed=random.randint(1,10)))
 
 	def reset_game(self):
 		# TODO
