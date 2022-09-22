@@ -3,9 +3,11 @@ from re import S
 from config import conf
 import random
 import pygame
+import time
 
 #----Player----
 from Player import Player
+from Square import Square
 
 pygame.init()
 
@@ -18,6 +20,7 @@ from sound import sound
 from locals import *
 
 class Game:
+	square_list: list
 
 	def __init__(self):
 		
@@ -26,9 +29,13 @@ class Game:
 		
 		self.clock = pygame.time.Clock()
 		
-		
+		self.click_damage = 1
 		sprites.game = self
-		
+		self.square_list = []
+		# self.square_list.append(Square(size = [100,100], pos = [200,200]))
+		self.square_list.append(Square(size = [50,50], pos = [50,50], vector=[3.1,1.3], speed=1))
+		self.square_list.append(Square(size = [50,50], pos = [10,100], vector=[1,1.3], speed=1))
+
 	
 	def set_screen(self):
 		'''Sets (resets) the self.screen variable with the proper fullscreen'''
@@ -75,7 +82,7 @@ class Game:
 			'right':False,
 			'left': False
 		}
-  
+		tic = time.time()
 		while True:
 			
 			for event in pygame.event.get():
@@ -93,28 +100,39 @@ class Game:
 						return False
 				elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 					mousepos = pygame.mouse.get_pos()
-					print("Clicked at",mousepos)
-					# TODO
-					pass
+					# print("Clicked at",mousepos)
+					# TODO: click damage
+					for square in self.square_list:
+						if isInsideRectangle(mousepos, square.get_rect()):	
+							square.point -= self.click_damage
+							if square.point <= 0:
+								self.square_list.remove(square)
+								print("Square destroyed")
+								
 			
 			self.draw()				
 			
-			'''
-			# Player -> enemy collisions
-			if player :
-				for enemy in pygame.sprite.spritecollide(player, self.enemies, False):
-					if lib.detect_collision(player, enemy):
-						#lose here
-						pass
-					
-			num_enemies = len(self.enemies)
-		
-			if num_enemies == 0:
-				x_pos = random.randint(0, WIDTH - 1)
-				y_pos = random.randint(0, HEIGHT - 1)
-				sprites.Enemy((x_pos,y_pos))
-    		'''
+			for square in self.square_list:
+				if(isRectangleOverlap(square.get_rect(), self.Player.get_rect())):
+					# TODO
+					# lose here``
+					print("Overlap")
+					self.hasSpawnPlayer = False
+					return False
+			toc = time.time()
+			if (toc - tic > 10): #10s
+				self.generate_square()
+				tic = toc
 
+	def generate_square(self):
+		# TODO
+		# setup level
+		self.square_list.append(Square(size = [50,50], pos = [random.randint(0, WIDTH),random.randint(0, HEIGHT_UPPER_BOUND_SQUARE)], vector=[random.uniform(0, 1),random.uniform(0, 1)], speed=random.randint(0,10)))
+
+	def reset_game(self):
+		# TODO
+		# reset game
+		pass
 
 	def draw(self):
 		'''Draw and update the game'''
@@ -131,7 +149,13 @@ class Game:
 		
   		#self.sprites.update()
 		self.sprites.draw(self.screen)
-		
+
+		#Square
+		for square in self.square_list:
+			square.update(self.screen)
+
+
+
 		pygame.display.update()
 		self.clock.tick(FRAME_RATE)
 	

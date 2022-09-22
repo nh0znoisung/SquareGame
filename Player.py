@@ -2,7 +2,7 @@ from pickle import TRUE
 from turtle import right
 import pygame
 
-SCALE_SIZE = (100, 100)
+from locals import *
 
 class Player:
     def __init__(self, scene, intialX, intialY, acceleration = 1):
@@ -27,21 +27,30 @@ class Player:
         self.numAnimation = 12
         scene.blit(self.player[self.curIndexAnimation], (intialX, intialY)) 
 
+    def get_rect(self):
+        return [self.curX, self.curY, self.curX + PLAYER_SIZE[0], self.curY + PLAYER_SIZE[1]]
+
     def Update(self, dealtaTime, scene, playermoves):
         flip = False
         
         if playermoves['left']:
-            self.curX -= self.acceleration * dealtaTime
+            if self.curX > self.acceleration * dealtaTime:
+                self.curX -= self.acceleration * dealtaTime
+            else:
+                self.curX = 0
             self.UpdateAnimation()
             flip = True
             
         elif playermoves['right']:
-            self.curX += self.acceleration * dealtaTime
+            if self.curX < WIDTH - PLAYER_SIZE[0] - self.acceleration * dealtaTime:
+                self.curX += self.acceleration * dealtaTime
+            else:
+                self.curX = WIDTH - PLAYER_SIZE[0]
             self.UpdateAnimation()
         else:
             self.curIndexAnimation = 0 
   
-        scene.blit(pygame.transform.scale(pygame.transform.flip(self.player[self.curIndexAnimation], flip, False), SCALE_SIZE), 
+        scene.blit(pygame.transform.scale(pygame.transform.flip(self.player[self.curIndexAnimation], flip, False), PLAYER_SIZE), 
                    
                    (self.curX, self.curY))
     
