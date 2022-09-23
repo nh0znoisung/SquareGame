@@ -84,15 +84,11 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     raise SystemExit
-                elif (
-                    event.type == pygame.KEYDOWN
-                    or event.type == pygame.KEYUP
-                    or event.type == pygame.K_SPACE
-                ):
+                elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
                     key_down = event.type == pygame.KEYDOWN
-                    if event.key == pygame.K_LEFT:
+                    if event.key == pygame.K_a:
                         self.playermoves["left"] = key_down
-                    elif event.key == pygame.K_RIGHT:
+                    elif event.key == pygame.K_d:
                         self.playermoves["right"] = key_down
                     elif key_down and event.key == pygame.K_SPACE:
                         if not self.is_shield and self.shields.get_nums() > 0:
@@ -123,7 +119,7 @@ class Game:
             ):
                 if lib.detect_collision(self.player.sprite, enemy):
                     if not self.is_shield:
-                        sound.play("explode", 1)
+                        sound.play("explode", 0)
                         return False
 
             # check shield still active
@@ -186,6 +182,8 @@ class Game:
 
         # Score
         self.score.update(self.screen)
+
+        self.shields.draw(self.screen)
 
         pygame.display.update()
         self.clock.tick(FRAME_RATE)
