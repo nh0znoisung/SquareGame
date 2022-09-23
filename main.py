@@ -98,8 +98,10 @@ class Game:
                     for square in self.enemies:
                         if isInsideRectangle(mousepos, square.get_rect()):
                             square.point -= self.click_damage
+                            sound.play("hit")
                             if square.point <= 0:
                                 self.score.add(square.origpoint)
+                                sound.play("explode")
                                 square.kill()
                                 print("Square destroyed")
 
@@ -111,7 +113,7 @@ class Game:
             ):
                 if lib.detect_collision(self.player.sprite, enemy):
                     if not self.is_shield:
-                        sound.play("explode", 0)
+                        sound.play("die", 0)
                         return False
 
             # check shield still active

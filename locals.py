@@ -5,7 +5,17 @@ HEIGHT_UPPER_BOUND_SQUARE = 280
 DATA_DIRNAME = "data"
 FONT_FILENAME = "font.ttf"
 
-SOUND_FILES = ("explode.ogg", "laser.ogg", "music.ogg", "title.ogg")
+SOUND_FILES = (
+    "explode.wav",
+    "laser.ogg",
+    "music.mp3",
+    "title.mp3",
+    "die.wav",
+    "hit.wav",
+    "menu_choosing.wav",
+    "menu_picked.wav",
+    "menu_switch.wav",
+)
 
 BACKGROUND = (0x11, 0x11, 0x00)
 WHITE = (0xFF, 0xFF, 0xFF)
