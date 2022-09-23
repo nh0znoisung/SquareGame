@@ -48,10 +48,6 @@ class Game:
             # Display the menu
             menu.show()
 
-            # Create groups
-            self.enemies = pygame.sprite.Group()
-            self.player = pygame.sprite.GroupSingle()
-
             sound.play("music", -1)
 
             self.play()
@@ -60,19 +56,16 @@ class Game:
 
     def play(self):
         """Returns false on game over, true on end of level"""
-        self.getTicksLastFrame = 0
+        self.enemies = pygame.sprite.Group()
+        self.player = pygame.sprite.GroupSingle()
 
         self.click_damage = 1
         self.shields = Shields()
         self.is_shield = False
         self.score = Score()
         self.background = lib.draw_background()
-        self.enemies.add(
-            Square(size=[50, 50], pos=[50, 50], vector=[3.1, 1.3], speed=1)
-        )
-        self.enemies.add(Square(size=[50, 50], pos=[10, 100], vector=[1, 1.3], speed=1))
-
         self.spawn_player()
+        self.generate_square()
 
         self.playermoves = {"right": False, "left": False}
 
@@ -96,7 +89,6 @@ class Game:
                             self.shields.subtract()
                             tic_shield = time.time()
                     elif key_down and event.key == pygame.K_ESCAPE:
-                        self.player.sprite.kill()
                         pygame.event.clear()
                         return False
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -149,7 +141,7 @@ class Game:
                     random.randint(0, HEIGHT_UPPER_BOUND_SQUARE),
                 ],
                 vector=[random.uniform(0, 1), random.uniform(0, 1)],
-                speed=random.randint(1, 10),
+                speed=random.randint(50, 300),
             )
         )
 
@@ -163,13 +155,12 @@ class Game:
 
     def draw(self):
         """Draw and update the game"""
-
         self.screen.blit(self.background, (0, 0))
 
-        deltaTime = self.GetDeltaTime()
-        # Player
+        deltaTime = self.clock.tick(FRAME_RATE) / 1000.0
 
-        self.enemies.update()
+        # Player
+        self.enemies.update(deltaTime)
         self.enemies.draw(self.screen)
 
         if self.player:
@@ -186,13 +177,6 @@ class Game:
         self.shields.draw(self.screen)
 
         pygame.display.update()
-        self.clock.tick(FRAME_RATE)
-
-    def GetDeltaTime(self):
-        t = pygame.time.get_ticks()
-        deltaTime = (t - self.getTicksLastFrame) / 1000.0
-        self.getTicksLastFrame = t
-        return deltaTime
 
 
 if __name__ == "__main__":

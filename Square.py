@@ -4,7 +4,7 @@ from locals import *
 
 
 class Square(pygame.sprite.Sprite):
-    def __init__(self, size=[50, 50], idx=-1, pos=[0, 100], speed=10, vector=[1, 1]):
+    def __init__(self, size=[50, 50], idx=-1, pos=[0, 100], speed=100, vector=[1, 1]):
         pygame.sprite.Sprite.__init__(self)
         if idx <= -1 or idx > 8:
             self.idx = random.randint(0, 8)
@@ -43,11 +43,11 @@ class Square(pygame.sprite.Sprite):
         self.image = self.origimage.copy()
         self.image.blit(pointText, (0, 0))
 
-    def update(self):
+    def update(self, delta):
         self.displayPoint()
         self.rect.topleft = self.position
-        self.position[0] += self.vector[0] * self.speed
-        self.position[1] += self.vector[1] * self.speed
+        self.position[0] += self.vector[0] * self.speed * delta
+        self.position[1] += self.vector[1] * self.speed * delta
 
         # Wall
         if self.position[0] <= 0 and self.vector[0] < 0:
