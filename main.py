@@ -161,7 +161,7 @@ class Game:
 						if square.point <= 0:
 							self.score.add(square.get_point())
 							self.square_list.remove(square)	
-				if ok and self.bullet_mode == 1:
+				if ok and bullet.mode == 1:
 					self.bullet_list.remove(bullet)
 						
 			# Remove bullet that is out of screen
@@ -231,7 +231,7 @@ class Game:
 		self.screen.blit(self.background, (0, 0))
   		#Player
 		if not self.hasSpawnPlayer:
-			self.Player = Player(self.screen, WIDTH/2-50, 450, 300)
+			self.Player = Player(self.screen, WIDTH/2-50, HEIGHT-150, 300)
 			self.hasSpawnPlayer = True
 			self.getTicksLastFrame = 0
 		else:
