@@ -92,7 +92,7 @@ class Game:
 		}
 		tic_generate_square = time.time()
 		tic_shield = time.time()
-		tic_shield_cooldown = time.time()
+		tic_shield_cooldown = -1
 		while True:
 			
 			for event in pygame.event.get():
@@ -111,6 +111,8 @@ class Game:
 						print(self.bullet_mode)
 					elif key_down and event.key == pygame.K_SPACE:
 						if not self.is_shield and self.shields.get_nums() > 0:
+							if self.shields.get_nums() == SHIELD_MAX_NUMS:
+								tic_shield_cooldown = time.time()
 							self.is_shield = True
 							self.shields.subtract()
 							tic_shield = time.time()
@@ -130,11 +132,14 @@ class Game:
 					self.is_shield = False
 					
 
-			if self.shields.get_nums() < SHIELD_MAX_NUMS:
+			if tic_shield_cooldown != -1:
 				toc_shield_cooldown = time.time()
 				if toc_shield_cooldown - tic_shield_cooldown > SHIELD_COOLDOWN:
 					self.shields.add()
-					tic_shield_cooldown = toc_shield_cooldown
+					if self.shields.get_nums() == SHIELD_MAX_NUMS:
+						tic_shield_cooldown = -1
+					else:
+						tic_shield_cooldown = toc_shield_cooldown
 			
 			# Collision bullet and square
 			for bullet in self.bullet_list:
