@@ -11,16 +11,19 @@ class Square(pygame.sprite.Sprite):
         else:
             self.idx = idx
 
-        self.image = pygame.image.load("data/Square/Square_{}.png".format(self.idx))
-        self.image = pygame.transform.scale(self.image, (size[0], size[0]))
-        self.rect = self.image.get_rect(topleft=pos)
+        self.size = size
+        self.origimage = pygame.image.load("data/Square/Square_{}.png".format(self.idx))
+        self.origimage = pygame.transform.scale(
+            self.origimage, (self.size[0], self.size[1])
+        )
+        self.image = self.origimage.copy()
 
+        self.rect = self.image.get_rect(topleft=pos)
         self.speed = speed
         self.vector = vector
         self.nomalize()
         self.position = pos
-        self.size = size
-        self.point = SQUARE_POINT[self.idx]
+        self.origpoint = self.point = SQUARE_POINT[self.idx]
 
     def nomalize(self):
         ss = (self.vector[0] ** 2 + self.vector[1] ** 2) ** 0.5
@@ -34,7 +37,14 @@ class Square(pygame.sprite.Sprite):
             self.position[1] + self.size[1],
         ]
 
+    def displayPoint(self):
+        pointFont = pygame.font.SysFont("CopperPlate Gothic", 20, bold=True)
+        pointText = pointFont.render(str(self.point), True, "white")
+        self.image = self.origimage.copy()
+        self.image.blit(pointText, (0, 0))
+
     def update(self):
+        self.displayPoint()
         self.rect.topleft = self.position
         self.position[0] += self.vector[0] * self.speed
         self.position[1] += self.vector[1] * self.speed

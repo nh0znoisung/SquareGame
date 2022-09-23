@@ -38,6 +38,19 @@ class Player(pygame.sprite.Sprite):
         self.image = self.player[self.curIndexAnimation]
         self.rect = self.image.get_rect()
 
+    def draw_shield(self, screen, is_shield):
+        if is_shield:
+            pygame.draw.circle(
+                screen,
+                "YELLOW",
+                (
+                    self.curX + PLAYER_SIZE[0] / 2 - 5,
+                    self.curY + PLAYER_SIZE[1] / 2 + 9.5,
+                ),
+                50,
+                5,
+            )
+
     def update(self, deltaTime, playermoves):
         self.rect.topleft = [self.curX, self.curY]
         self.animTime += deltaTime
