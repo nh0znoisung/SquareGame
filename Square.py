@@ -13,12 +13,12 @@ class Square:
         self.square = pygame.transform.scale(self.square, (size[0], size[0]))
         self.speed = speed
         self.vector = vector
-        self.nomalize()
+        self.normalize()
         self.position = pos
         self.size = size
         self.point = SQUARE_POINT[self.idx]
 
-    def nomalize(self): # make sure sum always equals 2
+    def normalize(self): # make sure sum always equals 2
         ss = (self.vector[0]**2 + self.vector[1]**2)**0.5
         self.vector = [self.vector[0] / ss, self.vector[1]/ss]
 

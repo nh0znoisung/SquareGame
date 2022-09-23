@@ -34,6 +34,9 @@ class Player:
     def get_rect(self):
         return [self.curX + DELTA_PLAYER_SIZE, self.curY + DELTA_PLAYER_SIZE, self.curX + PLAYER_SIZE[0] - DELTA_PLAYER_SIZE * 2, self.curY + PLAYER_SIZE[1] - DELTA_PLAYER_SIZE * 2]
 
+    def get_pos(self):
+        return [self.curX + PLAYER_SIZE[0]/2 - 5, self.curY + PLAYER_SIZE[1]/2 + 9.5]
+
     def Update(self, dealtaTime, scene, playermoves):
         flip = False
         

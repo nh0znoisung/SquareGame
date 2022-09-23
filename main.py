@@ -43,7 +43,7 @@ class Game:
 		self.is_shield = False
 		self.score = Score()
 		self.bullet_list = []
-
+		self.bullet_mode = 1
 	
 	def set_screen(self):
 		'''Sets (resets) the self.screen variable with the proper fullscreen'''
@@ -106,7 +106,9 @@ class Game:
 						self.playermoves['left'] = key_down
 					elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
 						self.playermoves['right'] = key_down
-					# elif event.key == pygame.K:
+					elif key_down and event.key == pygame.K_s:
+						self.bullet_mode = 1 - self.bullet_mode
+						print(self.bullet_mode)
 					elif key_down and event.key == pygame.K_SPACE:
 						if not self.is_shield and self.shields.get_nums() > 0:
 							self.is_shield = True
@@ -117,17 +119,9 @@ class Game:
 						pygame.event.clear()
 						return False
 				elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-					mousepos = pygame.mouse.get_pos()
-					# print("Clicked at",mousepos)
 					# TODO: click damage
-					for square in self.square_list:
-						if isInsideRectangle(mousepos, square.get_rect()):	
-							square.point -= self.click_damage
-							if square.point <= 0:
-								self.score.add(square.get_point())
-								self.square_list.remove(square)
-								# print("Square destroyed")
-				
+					mousepos = pygame.mouse.get_pos()
+					self.shoot(mousepos, self.Player.get_pos())
 								
 			if self.is_shield:
 				toc_shield = time.time()
@@ -142,6 +136,19 @@ class Game:
 					self.shields.add()
 					tic_shield_cooldown = toc_shield_cooldown
 			
+			# Collision bullet and square
+			for bullet in self.bullet_list:
+				ok = False
+				for square in self.square_list:
+					if isInsideRectangle(bullet.get_pos(), square.get_rect()):
+						ok = True
+						square.point -= bullet.damage
+						if square.point <= 0:
+							self.score.add(square.get_point())
+							self.square_list.remove(square)	
+				if ok:
+					self.bullet_list.remove(bullet)
+						
 			self.draw()				
 			
 			for square in self.square_list:
@@ -155,7 +162,20 @@ class Game:
 				self.generate_square()
 				tic_generate_square = toc_generate_square
 
-	def shoot(self): pass
+
+
+	def shoot(self, mousepos, player_pos):
+		vector = [mousepos[0] - player_pos[0], mousepos[1] - player_pos[1]]
+		if self.bullet_mode == 0:
+			self.bullet_list.append(Bullet(player_pos, vector, self.bullet_mode))
+		elif self.bullet_mode == 1:
+			self.bullet_add(player_pos, vector, 0)
+			self.bullet_add(player_pos, vector, 30)
+			self.bullet_add(player_pos, vector, -30)
+	def bullet_add(self, player_pos, vector, angel):
+		new_vector  = rotateVector(vector, angel)
+		self.bullet_list.append(Bullet(player_pos, new_vector, self.bullet_mode))
+		
 
 	def set_level(self): pass
 
@@ -182,16 +202,21 @@ class Game:
   		#self.sprites.update()
 		self.sprites.draw(self.screen)
 
-		#Shield
+		#Shield Player
 		self.Player.draw_shield(self.screen, self.is_shield)
 
 		#Score
 		self.score.update(self.screen)
 
+		#Bullet
+		for bullet in self.bullet_list:
+			bullet.update(self.screen)
+
 		#Square
 		for square in self.square_list:
 			square.update(self.screen)
 
+		#Shield
 		self.shields.draw(self.screen)
 
 		pygame.display.update()

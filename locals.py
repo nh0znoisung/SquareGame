@@ -1,3 +1,4 @@
+import math
 
 GAME = 'Square Game'
 WIDTH, HEIGHT = (800, 600)
@@ -32,7 +33,9 @@ SHIELD_DELTA_SPACE = 10
 BAR_HEIGHT = 20
 
 # BULLET_SIZE = (142, 82)
-BULLET_SIZE = (17, 10)
+# BULLET_SIZE = (17, 10)
+BULLET_SIZE = (25, 20)
+BULLET_TYPE_NUMS = 2
 
 SQUARE_POINT = [2,5,8,10,15,25,30,40,50] 
 
@@ -46,7 +49,12 @@ def isRectangleOverlap(R1, R2):
 # point = [x, y]
 # R = [x1, y1, x2, y2]
 def isInsideRectangle(point, R):
-    if (point[0]>=R[0] and point[0]<=R[2] and point[1]>=R[1] and point[1]<=R[3]):
+    if (point[0]>=R[0] - 10 and point[0]<=R[2] and point[1]>=R[1] - 20 and point[1]<=R[3]):
         return True
     else:
         return False
+
+def rotateVector(vector, angle, rad = False):
+    if not rad:
+        angle = math.radians(angle)
+    return [vector[0]*math.cos(angle) - vector[1]*math.sin(angle), vector[0]*math.sin(angle) + vector[1]*math.cos(angle)]
