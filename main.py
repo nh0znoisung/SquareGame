@@ -186,7 +186,7 @@ class Game:
 
 
 	def draw_cooldown(self):
-		pygame.draw.arc(self.screen, "BLUE", 
+		pygame.draw.arc(self.screen, "ORANGE", 
 		(self.Player.curX + 5, self.Player.curY + 19.5, COOLDOWN_RADIUS, COOLDOWN_RADIUS),
 		0, (min(time.time() - self.tic_bullet_1, BULLET1_COOLDOWN[self.level])) * math.pi*2 / BULLET1_COOLDOWN[self.level], 
 		4)

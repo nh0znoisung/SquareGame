@@ -29,7 +29,7 @@ class Player:
 
     def draw_shield(self, screen, is_shield):
         if is_shield:
-            pygame.draw.circle(screen, "YELLOW", (self.curX + PLAYER_SIZE[0]/2 - 5, self.curY + PLAYER_SIZE[1]/2 + 9.5), 50, 5)
+            pygame.draw.circle(screen, "BLUE", (self.curX + PLAYER_SIZE[0]/2 - 5, self.curY + PLAYER_SIZE[1]/2 + 9.5), 50, 5)
 
     def get_rect(self):
         return [self.curX + DELTA_PLAYER_SIZE, self.curY + DELTA_PLAYER_SIZE, self.curX + PLAYER_SIZE[0] - DELTA_PLAYER_SIZE * 2, self.curY + PLAYER_SIZE[1] - DELTA_PLAYER_SIZE * 2]
