@@ -3,11 +3,15 @@ from re import S
 from config import conf
 import random
 import pygame
+from pygame.locals import *
 import time
+from Shields import Shields
+from Score import Score
 
 #----Player----
 from Player import Player
 from Square import Square
+from Bullet import Bullet
 
 pygame.init()
 
@@ -35,6 +39,10 @@ class Game:
 		# self.square_list.append(Square(size = [100,100], pos = [200,200]))
 		self.square_list.append(Square(size = [50,50], pos = [50,50], vector=[3.1,1.3], speed=1))
 		self.square_list.append(Square(size = [50,50], pos = [10,100], vector=[1,1.3], speed=1))
+		self.shields = Shields()
+		self.is_shield = False
+		self.score = Score()
+		self.bullet_list = []
 
 	
 	def set_screen(self):
@@ -51,7 +59,7 @@ class Game:
 		menu = Menu(self)
 		
 		while True:
-			
+			self.__init__()
 			# Display the menu
 			menu.show()
 			
@@ -82,18 +90,28 @@ class Game:
 			'right':False,
 			'left': False
 		}
-		tic = time.time()
+		tic_generate_square = time.time()
+		tic_shield = time.time()
+		tic_shield_cooldown = time.time()
 		while True:
 			
 			for event in pygame.event.get():
+				# print(pygame.mouse.get_pos())
 				if event.type == pygame.QUIT:
 					raise SystemExit
+					# 
 				elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
 					key_down = (event.type == pygame.KEYDOWN)
-					if event.key == pygame.K_LEFT:
+					if event.key == pygame.K_LEFT or event.key == pygame.K_a:
 						self.playermoves['left'] = key_down
-					elif event.key == pygame.K_RIGHT:
+					elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
 						self.playermoves['right'] = key_down
+					# elif event.key == pygame.K:
+					elif key_down and event.key == pygame.K_SPACE:
+						if not self.is_shield and self.shields.get_nums() > 0:
+							self.is_shield = True
+							self.shields.subtract()
+							tic_shield = time.time()
 					elif key_down and event.key == pygame.K_ESCAPE:
 						self.player.kill()
 						pygame.event.clear()
@@ -106,33 +124,46 @@ class Game:
 						if isInsideRectangle(mousepos, square.get_rect()):	
 							square.point -= self.click_damage
 							if square.point <= 0:
+								self.score.add(square.get_point())
 								self.square_list.remove(square)
-								print("Square destroyed")
+								# print("Square destroyed")
+				
 								
+			if self.is_shield:
+				toc_shield = time.time()
+				if toc_shield - tic_shield > SHIELD_PROTECT:
+					tic_shield = toc_shield 
+					self.is_shield = False
+					
+
+			if self.shields.get_nums() < SHIELD_MAX_NUMS:
+				toc_shield_cooldown = time.time()
+				if toc_shield_cooldown - tic_shield_cooldown > SHIELD_COOLDOWN:
+					self.shields.add()
+					tic_shield_cooldown = toc_shield_cooldown
 			
 			self.draw()				
 			
 			for square in self.square_list:
 				if(isRectangleOverlap(square.get_rect(), self.Player.get_rect())):
-					# TODO
-					# lose here``
-					print("Overlap")
-					self.hasSpawnPlayer = False
-					return False
-			toc = time.time()
-			if (toc - tic > 10): #10s
+					if not self.is_shield:
+						return False
+			
+			# TODO: generate level
+			toc_generate_square = time.time()
+			if (toc_generate_square - tic_generate_square > 10): #10s
 				self.generate_square()
-				tic = toc
+				tic_generate_square = toc_generate_square
+
+	def shoot(self): pass
+
+	def set_level(self): pass
 
 	def generate_square(self):
 		# TODO
 		# setup level
 		self.square_list.append(Square(size = [50,50], pos = [random.randint(0, WIDTH),random.randint(0, HEIGHT_UPPER_BOUND_SQUARE)], vector=[random.uniform(0, 1),random.uniform(0, 1)], speed=random.randint(1,10)))
 
-	def reset_game(self):
-		# TODO
-		# reset game
-		pass
 
 	def draw(self):
 		'''Draw and update the game'''
@@ -146,15 +177,22 @@ class Game:
 			self.getTicksLastFrame = 0
 		else:
 			self.Player.Update(self.GetDeltaTime(), self.screen, self.playermoves)
+
 		
   		#self.sprites.update()
 		self.sprites.draw(self.screen)
+
+		#Shield
+		self.Player.draw_shield(self.screen, self.is_shield)
+
+		#Score
+		self.score.update(self.screen)
 
 		#Square
 		for square in self.square_list:
 			square.update(self.screen)
 
-
+		self.shields.draw(self.screen)
 
 		pygame.display.update()
 		self.clock.tick(FRAME_RATE)
