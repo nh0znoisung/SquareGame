@@ -234,8 +234,7 @@ class Game:
                                         text = text[:-1]
                                     else:
                                         text += event.unicode
-                        # background_image = pygame.image.load("data/gameover.png")
-                        background_image = pygame.Surface((1,1))
+                        background_image = pygame.image.load("data/gameover.png")
                         background_image = pygame.transform.scale(background_image, [WIDTH, HEIGHT])
 
                         
