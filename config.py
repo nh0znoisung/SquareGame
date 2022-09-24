@@ -47,7 +47,7 @@ class __Config(object):
     def register_highscore(self, name, score):
         '''Register a highscore'''
         
-        name = name[:self.MAX_NAME_LEN]
+        name = "Anonymous" if name=="" else name[:self.MAX_NAME_LEN]
         
         self.highscores.append((name, score))
         file = open('highscore.txt', 'a')

@@ -2,8 +2,8 @@ import math
 import sys
 
 GAME = 'Square Game'
-WIDTH, HEIGHT = (800, 600)
-# WIDTH, HEIGHT = (600, 800)
+# WIDTH, HEIGHT = (800, 600)
+WIDTH, HEIGHT = (600, 800)
 
 
 DATA_DIRNAME = "data"
@@ -19,6 +19,9 @@ SOUND_FILES = (
     "menu_choosing.wav",
     "menu_picked.wav",
     "menu_switch.wav",
+    "bullet1.mp3",
+    "bullet2.wav",
+    "shield.wav"
 )
 
 BACKGROUND = (0x11, 0x11, 0x00)
@@ -51,13 +54,13 @@ BULLET_TYPE_NUMS = 2
 COOLDOWN_RADIUS = 110
 
 # Setup level
-SQUARE_SIZE = [45, 55, 65, 80, 95]
+SQUARE_SIZE = [50, 60, 70, 80, 95]
 SQUARE_POINT = [25,35,45,55,70,95,120,150,200] 
 LEVEL_SCORE_UPPER_BOUND = [100, 400, 1000, sys.maxsize]
 LEVEL_NUMS = 4
 HEIGHT_UPPER_BOUND_SQUARE = [220,255,385,325]
-SPEED_LOWER_BOUND_SQUARE = [3,5,6,7]
-SPEED_UPPER_BOUND_SQUARE = [5,8,10,12]
+SPEED_LOWER_BOUND_SQUARE = [6,10,12,14]
+SPEED_UPPER_BOUND_SQUARE = [10,16,18,20]
 INDEX_LOWER_BOUND_SQUARE = [0,1,3,5]
 INDEX_UPPER_BOUND_SQUARE = [2,4,6,8]
 PERIOD_GENRATE = [8.5,8,7,6]
@@ -69,6 +72,7 @@ BULLET2_SHOOT_NUMS = [3,3,3,5] #odd number
 BULLET2_SHOOT_ANGLE = [30,30,20,16] #degree
 BULLET2_SPEED = [4,6,8,10]
 GENERATE_SQUARE = [1,2,3,5]
+SLASH_DAMAGE = [0.3, 0.5, 0.75, 1]
 
 black = (0,0,0)
 white = (255,255,255)
@@ -79,7 +83,8 @@ green = (0,200,0)
 bright_red = (255,0,0)
 bright_green = (0,255,0)
 
-WRITENAME_WIDTH, WRITENAME_HEIGHT = (140,350)
+INPUT_WIDTH = 380
+INPUT_HEIGHT = 32
 
 # R1 = [x1, y1, x2, y2]
 def isRectangleOverlap(R1, R2):

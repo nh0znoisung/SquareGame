@@ -43,12 +43,26 @@ class Menu(object):
     HELP_TEXT = """\
 Controls:
 
-      Right/Left
-           Move player right or left
-      Mouse
-           Shoot the squares
-      ESC
-           Exit to the main menu"""
+      Button A or Left Arrow
+            Move player left
+
+      Button D or Right Arrow
+            Move player right
+
+      Button Shift
+            Move player dashing toward the current direction 
+
+      Button W
+            Change the bullet mode
+
+      Mouse Left Click
+            Shoot the squares by bullet
+
+      Mouse Right Click
+            Shoot the squares swordslash
+
+      ESC in game screen
+            Pause the game or exit the main menu"""
 
     def __init__(self, game):
         self.game = game
@@ -64,7 +78,7 @@ Controls:
 
         self._last_choice = 0
         self._return_to_menu()
-        background = lib.draw_background()
+        background = lib.draw_background_menu()
 
         while True:
 

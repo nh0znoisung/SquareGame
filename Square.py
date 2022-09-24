@@ -42,10 +42,11 @@ class Square(pygame.sprite.Sprite):
         ]
 
     def displayPoint(self):
-        pointFont = pygame.font.SysFont("CopperPlate Gothic", 20, bold=True)
-        pointText = pointFont.render(str(math.ceil(self.point)), True, "white")
+        pointFont = pygame.font.SysFont("CopperPlate Gothic", int(23*self.size[0]/40), bold=True)
+        pointText = pointFont.render(str(math.ceil(self.point)), True, "black")
+        pointTextSize = pointFont.size(str(math.ceil(self.point)))
         self.image = self.origimage.copy()
-        self.image.blit(pointText, (0, 0))
+        self.image.blit(pointText, (self.size[0]/2 - pointTextSize[0]/2, self.size[1]/2 - pointTextSize[1]/2))
 
     def update(self, delta):
         self.displayPoint()

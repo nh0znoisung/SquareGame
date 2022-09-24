@@ -44,12 +44,15 @@ def get_text_width(text, size):
     return __get_font(size).size(text)[0]
 
 
-def draw_background(width=WIDTH, height=HEIGHT):
-    """Render the background with height (defaults to screen height)."""
-    background = pygame.image.load("data/bg.png")
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+def draw_background_main():
+    """Render the background for main screen."""
+    background = pygame.image.load("data/bg_main.png")
     return background
 
+def draw_background_menu():
+    """Render the background for menu screen."""
+    background = pygame.image.load("data/bg_menu.png")
+    return background
 
 def filename(name):
     """Get the path of a data file"""

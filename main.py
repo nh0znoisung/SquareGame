@@ -74,8 +74,10 @@ class Game:
 
     def paused(self):
         sound.stop("music")
-        paused = lib.render_text("Paused", 100) 
-        self.screen.blit(paused, ((WIDTH/3),(HEIGHT/3)))
+        pausedFont = pygame.font.SysFont("CopperPlate Gothic", 100, bold=True)
+        pausedText = pausedFont.render("PAUSED", True, "WHITE")
+        pausedTextSize = pausedFont.size("PAUSED")
+        self.screen.blit(pausedText, (int(WIDTH/2-pausedTextSize[0]/2),int(HEIGHT/2-pausedTextSize[1]/2)))
 
         while self.is_pause:
             for event in pygame.event.get():
@@ -98,6 +100,7 @@ class Game:
         self.scheduler = Game.Scheduler() 
         self.nextSquareTime = 5
         self.level = 0
+        print("Current level: ", self.level)
 
         self.bullet_list = []
         self.bullet_mode = 1
@@ -105,7 +108,7 @@ class Game:
         self.click_damage = 200
         self.shields = Shields()
         self.score = Score()
-        self.background = lib.draw_background()
+        self.background = lib.draw_background_main()
         self.spawn_player()
         self.generate_square()
 
@@ -120,9 +123,9 @@ class Game:
                     raise SystemExit
                 elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
                     key_down = event.type == pygame.KEYDOWN
-                    if event.key == pygame.K_a:
+                    if event.key == pygame.K_a or event.key == pygame.K_LEFT:
                         self.playermoves["left"] = key_down
-                    elif event.key == pygame.K_d:
+                    elif event.key == pygame.K_d or event.key == pygame.K_RIGHT:
                         self.playermoves["right"] = key_down
                     elif event.key == pygame.K_LSHIFT:
                         self.playermoves['dash'] = key_down
@@ -134,19 +137,26 @@ class Game:
                             self.player.activateShield()
                             self.scheduler.addJob(SHIELD_COOLDOWN,self.shields.add)
                             self.scheduler.addJob(SHIELD_PROTECT,self.player.deActivateShield)
+                            sound.play("shield")
                     elif key_down and event.key == pygame.K_ESCAPE:
                         self.is_pause = True
                         self.paused()
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #left-click
                     mousepos = pygame.mouse.get_pos()
                     toc_bullet_1 = time.time()
                     if toc_bullet_1 - self.tic_bullet_1 >= BULLET1_COOLDOWN[self.level]:
                         pos=self.player.get_pos()
                         pos=[pos[0]+20+(1-self.player.anim.animFlip)*30,pos[1]+30]
                         self.shoot(mousepos, pos)
+                        #sound play
+                        if self.bullet_mode == 0:
+                            sound.play("bullet1")
+                        elif self.bullet_mode == 1:
+                            sound.play("bullet2")
+                        #reset tic
                         if self.bullet_mode == 0:
                             self.tic_bullet_1 = toc_bullet_1
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3: #right-click
                     if not self.playermoves['slash']:
                         self.playermoves['slash']=True
                         sound.play("hit")
@@ -180,7 +190,7 @@ class Game:
                 ):
                     if lib.detect_collision(self.player, enemy):
                         if not self.player.is_shield:
-                            sound.play("die", 0)
+                            sound.play("die")
                             self.playermoves['die']=True
                             self.isGameOver=True
 
@@ -190,7 +200,7 @@ class Game:
                     self.player.anim.swordSlashSprite, self.enemiesGroup, False
                 ):
                     if lib.detect_collision(self.player.anim.swordSlashSprite, enemy):
-                        enemy.point -= self.click_damage*deltaTime
+                        enemy.point -= self.click_damage*deltaTime*SLASH_DAMAGE[self.level]
                         if enemy.point <= 0:
                             self.score.add(enemy.get_point())
                             sound.play("explode")
@@ -205,11 +215,11 @@ class Game:
                     sound.stop("music")
                     font = pygame.font.Font(None, 32)
                     clock = pygame.time.Clock()
-                    input_box = pygame.Rect(WRITENAME_WIDTH+70, WRITENAME_HEIGHT+70, 380, 32)
+                    input_box = pygame.Rect(WIDTH/2-INPUT_WIDTH/2, 500-INPUT_HEIGHT/2, INPUT_WIDTH, INPUT_HEIGHT)
                     color_inactive = pygame.Color('lightskyblue3')
                     color_active = pygame.Color('dodgerblue2')
                     color = color_inactive
-                    active = False
+                    active = True # Default on selected
                     text = ''
                     done = False
 
@@ -232,25 +242,25 @@ class Game:
                                         done = True
                                     elif event.key == pygame.K_BACKSPACE:
                                         text = text[:-1]
-                                    else:
+                                    elif event.key == pygame.K_SPACE:
                                         text += event.unicode
                         background_image = pygame.image.load("data/gameover.png")
-                        background_image = pygame.transform.scale(background_image, [WIDTH, HEIGHT])
+                        background_size = [400, 400]
+                        background_image = pygame.transform.scale(background_image, background_size)
 
                         
-                        
                         self.screen.fill((30, 30, 30))
-                        # Render the current text.
-                        txt_surface = font.render(text, True, color)
-                        # Resize the box if the text is too long.
-                        width = max(200, txt_surface.get_width()+10)
-                        #input_box.w = width
-                        # Blit the text.
-                        self.screen.blit(background_image, [0, 0])
-                        writename = lib.render_text("Write your name", 60, (0x00, 0x99, 0xFF)) 
-                        self.screen.blit(writename, (WRITENAME_WIDTH,WRITENAME_HEIGHT))
-                        self.screen.blit(txt_surface, (WRITENAME_WIDTH+73, WRITENAME_HEIGHT+73))
-                        # Blit the input_box rect.
+
+                        # Blit the background
+                        self.screen.blit(background_image, [WIDTH/2-background_size[0]/2, 200-background_size[1]/2])
+                        
+                        # Blit the writename
+                        writenameFont = pygame.font.SysFont("CopperPlate Gothic", 60, bold=True)
+                        writenameText = writenameFont.render("WRITE YOUR NAME", True, (0x00, 0x99, 0xFF))
+                        writenameTextSize = writenameFont.size("WRITE YOUR NAME")
+                        self.screen.blit(writenameText, (WIDTH/2-writenameTextSize[0]/2,425-writenameTextSize[1]/2))
+                        
+                        # Blit the input_box rect
                         pygame.draw.rect(self.screen, color, input_box, 2)
 
                         pygame.display.flip()
@@ -289,7 +299,6 @@ class Game:
         new_vector = rotateVector(vector, angel)
         self.bullet_list.append(Bullet(player_pos, new_vector, self.bullet_mode, BULLET2_SPEED[self.level], BULLET2_DAMAGE[self.level]))
         
-
     def generate_square(self):
         for i in range(random.randint(1,GENERATE_SQUARE[self.level])):
             self.enemiesGroup.add(Square(size = [random.choice(SQUARE_SIZE)]*2, 
@@ -301,7 +310,7 @@ class Game:
         self.scheduler.addJob(PERIOD_GENRATE[self.level],self.generate_square)
 
     def spawn_player(self):
-        self.player=Player(100, 450, 300)
+        self.player=Player(WIDTH/2-PLAYER_SIZE[0]/2, HEIGHT-150-PLAYER_SIZE[1]/2, 300)
         self.playerGroup.add(self.player)
 
     def reset_game(self):
