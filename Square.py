@@ -1,5 +1,6 @@
 import random
 import pygame
+import math
 from locals import *
 
 
@@ -39,7 +40,7 @@ class Square(pygame.sprite.Sprite):
 
     def displayPoint(self):
         pointFont = pygame.font.SysFont("CopperPlate Gothic", 20, bold=True)
-        pointText = pointFont.render(str(self.point), True, "white")
+        pointText = pointFont.render(str(math.ceil(self.point)), True, "white")
         self.image = self.origimage.copy()
         self.image.blit(pointText, (0, 0))
 

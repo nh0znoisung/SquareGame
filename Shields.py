@@ -16,7 +16,8 @@ class Shields:
             self.display(screen, i + 1)
     
     def add(self):
-        self.nums += 1
+        if self.get_nums()<SHIELD_MAX_NUMS:
+            self.nums += 1
     def subtract(self):
         self.nums -= 1
     def get_nums(self):

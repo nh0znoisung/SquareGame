@@ -3,6 +3,7 @@ import random
 import pygame
 from pygame.locals import *
 import time
+from collections import defaultdict
 from Shields import Shields
 from Score import Score
 
@@ -22,7 +23,23 @@ from locals import *
 
 
 class Game:
-    square_list: list
+
+    class Scheduler:
+        def __init__(self):
+            self.jobMap=defaultdict(list) #k=time, v=job
+
+        def addJob(self,waitSeconds,*jobs):
+            t=pygame.time.get_ticks()
+            self.jobMap[t+int(waitSeconds*1000)]+=jobs
+        
+        def proccess(self):
+            t=pygame.time.get_ticks()
+            jM =self.jobMap
+            self.jobMap=defaultdict(list)
+            for k,v in jM.items():
+                if k<t: [fun() for fun in v]
+                else: self.jobMap[k]+=v
+            del jM
 
     def __init__(self):
 
@@ -56,22 +73,22 @@ class Game:
 
     def play(self):
         """Returns false on game over, true on end of level"""
-        self.enemies = pygame.sprite.Group()
-        self.player = pygame.sprite.GroupSingle()
+        self.enemiesGroup = pygame.sprite.Group()
+        self.playerGroup = pygame.sprite.GroupSingle()
+        self.isGameOver = False
+        self.scheduler = Game.Scheduler() 
+        self.nextSquareTime = 5
 
-        self.click_damage = 1
+
+        self.click_damage = 30
         self.shields = Shields()
-        self.is_shield = False
         self.score = Score()
         self.background = lib.draw_background()
         self.spawn_player()
         self.generate_square()
 
-        self.playermoves = {"right": False, "left": False}
+        self.playermoves = {"right": False, "left": False,'slash':False,'dash':False,'die':False}
 
-        tic_generate_square = time.time()
-        tic_shield = time.time()
-        tic_shield_cooldown = time.time()
         while True:
 
             for event in pygame.event.get():
@@ -83,59 +100,56 @@ class Game:
                         self.playermoves["left"] = key_down
                     elif event.key == pygame.K_d:
                         self.playermoves["right"] = key_down
+                    elif event.key == pygame.K_LSHIFT:
+                        self.playermoves['dash'] = key_down
                     elif key_down and event.key == pygame.K_SPACE:
-                        if not self.is_shield and self.shields.get_nums() > 0:
-                            self.is_shield = True
+                        if not self.player.is_shield and self.shields.get_nums() > 0:
                             self.shields.subtract()
-                            tic_shield = time.time()
+                            self.player.activateShield()
+                            self.scheduler.addJob(SHIELD_COOLDOWN,self.shields.add)
+                            self.scheduler.addJob(SHIELD_PROTECT,self.player.deActivateShield)
                     elif key_down and event.key == pygame.K_ESCAPE:
                         pygame.event.clear()
                         return False
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    mousepos = pygame.mouse.get_pos()
-                    # print("Clicked at",mousepos)
-                    # TODO: click damage
-                    for square in self.enemies:
-                        if isInsideRectangle(mousepos, square.get_rect()):
-                            square.point -= self.click_damage
-                            sound.play("hit")
-                            if square.point <= 0:
-                                self.score.add(square.origpoint)
-                                sound.play("explode")
-                                square.kill()
-                                print("Square destroyed")
+                    if not self.playermoves['slash']:
+                        self.playermoves['slash']=True
+                        sound.play("hit")
 
-            self.draw()
+            deltaTime = self.clock.tick(FRAME_RATE) / 1000.0
+            self.draw(deltaTime)
 
             # player & enemy collision
-            for enemy in pygame.sprite.spritecollide(
-                self.player.sprite, self.enemies, False
-            ):
-                if lib.detect_collision(self.player.sprite, enemy):
-                    if not self.is_shield:
-                        sound.play("die", 0)
-                        return False
+            if not self.isGameOver:
+                for enemy in pygame.sprite.spritecollide(
+                    self.player, self.enemiesGroup, False
+                ):
+                    if lib.detect_collision(self.player, enemy):
+                        if not self.player.is_shield:
+                            sound.play("die", 0)
+                            self.playermoves['die']=True
+                            self.isGameOver=True
 
-            # check shield still active
-            if self.is_shield:
-                toc_shield = time.time()
-                if toc_shield - tic_shield > SHIELD_PROTECT:
-                    tic_shield = toc_shield
-                    self.is_shield = False
+            # swordslash & enemy collision
+            if not self.player.anim.slashDone:
+                for enemy in pygame.sprite.spritecollide(
+                    self.player.anim.swordSlashSprite, self.enemiesGroup, False
+                ):
+                    if lib.detect_collision(self.player.anim.swordSlashSprite, enemy):
+                        enemy.point -= self.click_damage*deltaTime
+                        if enemy.point <= 0:
+                            self.score.add(enemy.origpoint)
+                            sound.play("explode")
+                            enemy.kill()
 
-            if self.shields.get_nums() < SHIELD_MAX_NUMS:
-                toc_shield_cooldown = time.time()
-                if toc_shield_cooldown - tic_shield_cooldown > SHIELD_COOLDOWN:
-                    self.shields.add()
-                    tic_shield_cooldown = toc_shield_cooldown
+            
+            self.scheduler.proccess()
 
-            toc_generate_square = time.time()
-            if toc_generate_square - tic_generate_square > 10:  # 10s
-                self.generate_square()
-                tic_generate_square = toc_generate_square
+            if self.isGameOver and self.player.anim.dieDone>=2:
+                return False
 
     def generate_square(self):
-        self.enemies.add(
+        self.enemiesGroup.add(
             Square(
                 size=[50, 50],
                 pos=[
@@ -146,32 +160,35 @@ class Game:
                 speed=random.randint(50, 300),
             )
         )
+        if self.nextSquareTime>2:
+            self.nextSquareTime*=0.96
+        
+        self.scheduler.addJob(self.nextSquareTime,self.generate_square)
 
     def spawn_player(self):
-        self.player.add(Player(100, 450, 300))
+        self.player=Player(100, 450, 300)
+        self.playerGroup.add(self.player)
 
     def reset_game(self):
         # TODO
         # reset game
         pass
 
-    def draw(self):
+    def draw(self,deltaTime):
         """Draw and update the game"""
         self.screen.blit(self.background, (0, 0))
 
-        deltaTime = self.clock.tick(FRAME_RATE) / 1000.0
-
         # Player
-        self.enemies.update(deltaTime)
-        self.enemies.draw(self.screen)
+        self.enemiesGroup.update(deltaTime)
+        self.enemiesGroup.draw(self.screen)
 
-        if self.player:
-            self.player.update(deltaTime, self.playermoves)
-            self.player.draw(self.screen)
-
+        if self.playerGroup:
+            self.playerGroup.update(deltaTime, self.playermoves)
+            self.playerGroup.draw(self.screen)
+            if not self.player.anim.slashDone:
+                self.player.anim.swordSlashGroup.draw(self.screen)
         # Shield
-        self.player.sprite.draw_shield(self.screen, self.is_shield)
-        # print(self.is_shield)
+        self.player.draw_shield(self.screen)
 
         # Score
         self.score.update(self.screen)

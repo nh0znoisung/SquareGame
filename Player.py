@@ -2,91 +2,194 @@ import pygame
 
 from locals import *
 
+#### loading animation ####
+def getWalk():
+    base=pygame.image.load("data/PlayerAnimation/walk/Player (1).png")
+    re =[pygame.Surface(base.get_size(),pygame.SRCALPHA,32) for _ in range(12)]
+    re= [re[i].convert_alpha() for i in range(12)]
+    [re[i].blit(pygame.image.load("data/PlayerAnimation/walk/Player (%d).png" % (i+1)),(-3,-13)) for i in range(12)]
+    return re
+
+def getSlash():
+    return [pygame.image.load("data/PlayerAnimation/slash/slash%d.png" % i) for i in range(7)]
+
+def getDash():
+    return [pygame.image.load("data/PlayerAnimation/dash/dash%d.png" % i) for i in range(4)]
+
+def getSwordSlash():
+    return [pygame.image.load("data/PlayerAnimation/saberslash/saberslash%d.png" % i) for i in range(7)]
+
+def getDie():
+    re=[pygame.image.load("data/PlayerAnimation/die/die0%d.png" % i) for i in range(10)]
+    return re[:2]+[re[2]]*3+re[2:]
+
+###########################
+
+#### animation utils ####
+def scaleAnim(l):
+    return [pygame.transform.scale2x(l[i]) for i in range(len(l))]
+
+def flipAnim(l):
+    return [pygame.transform.flip(l[i],True,False) for i in range(len(l))]
+
+def initAnim(l, withFlipped: bool):
+    return [l]+([flipAnim(l)] if withFlipped else [l])
+###########################
+
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, intialX, intialY, acceleration=1):
+    class PlayerAnim:
+        def __init__(self, walk, slash, dash, die, swordSlash):
+            self.idle = [[walk[0][0]],[walk[1][0]]]
+            self.walk = walk
+            self.slash = slash
+            self.dash = dash
+            self.die = die
+            self.swordSlash = swordSlash
+
+            self.curAnim = None
+            self.animFlip = False
+            self.swordSlashSprite = pygame.sprite.Sprite()
+            self.swordSlashGroup = pygame.sprite.GroupSingle(self.swordSlashSprite)
+            self.slashDone=True
+            self.dashDone=0
+            self.dieDone=0
+
+        def goIdle(self):
+            if self.curAnim is not self.idle:
+                self.curAnim = self.idle
+                self.animTime = 0
+                self.animDuration = 1
+                self.animSpriteOffset = 0
+
+        def goWalk(self):
+            if self.curAnim is not self.walk:
+                self.curAnim = self.walk
+                self.animSpriteOffset = 1
+                self.animTime = 0
+                self.animDuration = 1.0
+
+        def goSlash(self):
+            if self.curAnim is not self.slash:
+                self.curAnim = self.slash
+                self.animSpriteOffset = 0
+                self.animTime = 0
+                self.animDuration = 0.4
+                self.slashDone=False
+                self.swordSlashSpritePos=pygame.mouse.get_pos()
+
+        def goDash(self):
+            if self.curAnim is not self.dash:
+                self.curAnim = self.dash
+                self.animSpriteOffset = 0
+                self.animTime = 0
+                self.animDuration = 0.2
+                self.dashDone=0
+
+        def goDie(self):
+            if self.curAnim is not self.die:
+                self.curAnim = self.die
+                self.animSpriteOffset = 0
+                self.animTime = 0
+                self.animDuration = 1
+                self.dieDone=0
+
+        def getSprite(self, delta=0)->pygame.Surface:
+            self.animTime += delta
+            if self.animTime > self.animDuration:
+                self.animTime -= self.animDuration
+                if self.curAnim is self.walk:
+                    self.animSpriteOffset = 2  # begin from sprite 2 if walk
+                if self.curAnim is self.slash:
+                    self.slashDone = True
+                if self.curAnim is self.dash:
+                    self.animSpriteOffset = 3 
+                    self.dashDone +=1
+                if self.curAnim is self.die:
+                    self.animSpriteOffset = 9 
+                    self.dieDone += 1
+
+            # get sprite base on cur time and numsprite
+            numSprite = len(self.curAnim[0]) - self.animSpriteOffset
+            curIdx = self.animSpriteOffset + int(
+                self.animTime / self.animDuration * numSprite
+            ) % numSprite
+
+            if self.curAnim is self.slash:
+                self.swordSlashSprite.image = self.swordSlash[self.animFlip][curIdx]
+                self.swordSlashSprite.rect = self.swordSlashSprite.image.get_rect(center=self.swordSlashSpritePos)
+
+            return self.curAnim[self.animFlip][curIdx]
+
+    def __init__(self, initialX, initialY, acceleration=1):
         pygame.sprite.Sprite.__init__(self)
-        self.player = [
-            pygame.image.load("data/PlayerAnimation/Player (1).png"),
-            pygame.image.load("data/PlayerAnimation/Player (2).png"),
-            pygame.image.load("data/PlayerAnimation/Player (3).png"),
-            pygame.image.load("data/PlayerAnimation/Player (4).png"),
-            pygame.image.load("data/PlayerAnimation/Player (5).png"),
-            pygame.image.load("data/PlayerAnimation/Player (6).png"),
-            pygame.image.load("data/PlayerAnimation/Player (7).png"),
-            pygame.image.load("data/PlayerAnimation/Player (8).png"),
-            pygame.image.load("data/PlayerAnimation/Player (9).png"),
-            pygame.image.load("data/PlayerAnimation/Player (10).png"),
-            pygame.image.load("data/PlayerAnimation/Player (11).png"),
-            pygame.image.load("data/PlayerAnimation/Player (12).png"),
-        ]
-        for i in range(len(self.player)):
-            self.player[i] = pygame.transform.scale(self.player[i], PLAYER_SIZE)
-        self.playerFlipped = [
-            pygame.transform.flip(sprite, True, False) for sprite in self.player
-        ]
-        self.curX = intialX
-        self.curY = intialY
+
+        #### init animations ####
+        walkAnim = initAnim(scaleAnim(getWalk()), withFlipped=True)
+        slashAnim = initAnim(scaleAnim(getSlash()), withFlipped=True)
+        dashAnim = initAnim(scaleAnim(getDash()), withFlipped=True)
+        dieAnim = initAnim(scaleAnim(getDie()), withFlipped=True)
+        swordSlashAnim = initAnim(scaleAnim(getSwordSlash()), withFlipped=True)
+        # init player anim object
+        self.anim = Player.PlayerAnim(walkAnim, slashAnim,dashAnim,dieAnim,swordSlashAnim)
+        self.anim.goIdle()
+        ###########################
+
+        self.image = self.anim.getSprite()
+        self.rect = self.image.get_rect(topleft=(initialX,initialY))
+        self.pos = [initialX,initialY]
+        self.v=0
         self.acceleration = acceleration
-        self.curIndexAnimation = 0
-        self.numAnimation = 12
-        self.animTime = 0
-        self.animDuration = 1
-        self.animSpriteOffset = 1
-        self.animFlip = False
-
-        self.image = self.player[self.curIndexAnimation]
-        self.rect = self.image.get_rect()
-
-    def draw_shield(self, screen, is_shield):
-        if is_shield:
+        self.is_shield = False
+    def activateShield(self):
+        self.is_shield = True
+    def deActivateShield(self):
+        self.is_shield = False
+    def draw_shield(self, screen):
+        if self.is_shield:
             pygame.draw.circle(
                 screen,
                 "YELLOW",
                 (
-                    self.curX + PLAYER_SIZE[0] / 2 - 5,
-                    self.curY + PLAYER_SIZE[1] / 2 + 9.5,
+                    self.pos[0] + PLAYER_SIZE[0] / 2 -7,
+                    self.pos[1] + PLAYER_SIZE[1] / 2 ,
                 ),
-                50,
+                60,
                 5,
             )
 
     def update(self, deltaTime, playermoves):
-        self.rect.topleft = [self.curX, self.curY]
-        self.animTime += deltaTime
-
-        if playermoves["left"]:
-            self.animFlip = True
-            if self.curX > self.acceleration * deltaTime:
-                self.curX -= self.acceleration * deltaTime
-            else:
-                self.curX = 0
-            self.UpdateAnimation()
-
-        elif playermoves["right"]:
-            self.animFlip = False
-            if self.curX < WIDTH - PLAYER_SIZE[0] - self.acceleration * deltaTime:
-                self.curX += self.acceleration * deltaTime
-            else:
-                self.curX = WIDTH - PLAYER_SIZE[0]
-            self.UpdateAnimation()
+        self.v=0
+        
+        if playermoves['die']:
+            self.anim.goDie()
+        elif playermoves['slash']:
+            self.anim.goSlash()
+            if self.anim.slashDone:
+                playermoves['slash']=False
+                self.anim.goIdle()
         else:
-            self.curIndexAnimation = 0
-            self.animTime = 0
-            self.animSpriteOffset = 1
+            if playermoves['left']: self.anim.animFlip=True
+            if playermoves['right']: self.anim.animFlip=False
+            if playermoves['dash']:
+                self.v=self.acceleration*(1-2*self.anim.animFlip)*2
+                self.anim.goDash()
+                if self.anim.dashDone>=2:
+                    playermoves['dash']=False
+                    self.anim.goIdle()
+            else:
+                if playermoves["left"]:
+                    self.v=-self.acceleration
+                    self.anim.goWalk()
+                elif playermoves["right"]:
+                    self.v=self.acceleration
+                    self.anim.goWalk()
+                else:
+                    self.anim.goIdle()
 
-        self.image = (
-            self.player[self.curIndexAnimation]
-            if not self.animFlip
-            else self.playerFlipped[self.curIndexAnimation]
-        )
+        self.pos[0]+=self.v*deltaTime
+        self.pos[0]=max(0,self.pos[0])
+        self.pos[0]=min(WIDTH - PLAYER_SIZE[0],self.pos[0])
 
-    def UpdateAnimation(self):
-        if self.animTime > self.animDuration:
-            self.animTime - self.animDuration
-            self.animSpriteOffset = 2  # begin from sprite 2
-        self.curIndexAnimation = self.animSpriteOffset + int(
-            self.animTime
-            / self.animDuration
-            * (self.numAnimation - self.animSpriteOffset)
-        ) % (self.numAnimation - self.animSpriteOffset)
+        self.image = self.anim.getSprite(deltaTime)
+        self.rect.topleft = self.pos
