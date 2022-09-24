@@ -1,3 +1,4 @@
+from turtle import back
 from config import conf
 import random
 import pygame
@@ -71,6 +72,24 @@ class Game:
 
             sound.stop("music")
 
+    def paused(self):
+        sound.stop("music")
+        paused = lib.render_text("Paused", 100) 
+        self.screen.blit(paused, ((WIDTH/3),(HEIGHT/3)))
+
+        while self.is_pause:
+            for event in pygame.event.get():
+
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    self.is_pause = False
+                    sound.play("music")
+            #gameDisplay.fill(white)
+
+            pygame.display.update()
+
     def play(self):
         """Returns false on game over, true on end of level"""
         self.enemiesGroup = pygame.sprite.Group()
@@ -116,8 +135,8 @@ class Game:
                             self.scheduler.addJob(SHIELD_COOLDOWN,self.shields.add)
                             self.scheduler.addJob(SHIELD_PROTECT,self.player.deActivateShield)
                     elif key_down and event.key == pygame.K_ESCAPE:
-                        pygame.event.clear()
-                        return False
+                        self.is_pause = True
+                        self.paused()
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mousepos = pygame.mouse.get_pos()
                     toc_bullet_1 = time.time()
@@ -181,7 +200,66 @@ class Game:
             self.scheduler.proccess()
 
             if self.isGameOver and self.player.anim.dieDone>=2:
+                if conf.is_highscore(self.score.get_score()):
+                    sound.play("explode", 0)
+                    sound.stop("music")
+                    font = pygame.font.Font(None, 32)
+                    clock = pygame.time.Clock()
+                    input_box = pygame.Rect(WRITENAME_WIDTH+70, WRITENAME_HEIGHT+70, 380, 32)
+                    color_inactive = pygame.Color('lightskyblue3')
+                    color_active = pygame.Color('dodgerblue2')
+                    color = color_inactive
+                    active = False
+                    text = ''
+                    done = False
+
+                    while not done:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                raise SystemExit
+                            if event.type == pygame.MOUSEBUTTONDOWN:
+                                # If the user clicked on the input_box rect.
+                                if input_box.collidepoint(event.pos):
+                                    # Toggle the active variable.
+                                    active = not active
+                                else:
+                                    active = False
+                                # Change the current color of the input box.
+                                color = color_active if active else color_inactive
+                            if event.type == pygame.KEYDOWN:
+                                if active:
+                                    if event.key == pygame.K_RETURN:
+                                        done = True
+                                    elif event.key == pygame.K_BACKSPACE:
+                                        text = text[:-1]
+                                    else:
+                                        text += event.unicode
+                        # background_image = pygame.image.load("data/gameover.png")
+                        background_image = pygame.Surface((1,1))
+                        background_image = pygame.transform.scale(background_image, [WIDTH, HEIGHT])
+
+                        
+                        
+                        self.screen.fill((30, 30, 30))
+                        # Render the current text.
+                        txt_surface = font.render(text, True, color)
+                        # Resize the box if the text is too long.
+                        width = max(200, txt_surface.get_width()+10)
+                        #input_box.w = width
+                        # Blit the text.
+                        self.screen.blit(background_image, [0, 0])
+                        writename = lib.render_text("Write your name", 60, (0x00, 0x99, 0xFF)) 
+                        self.screen.blit(writename, (WRITENAME_WIDTH,WRITENAME_HEIGHT))
+                        self.screen.blit(txt_surface, (WRITENAME_WIDTH+73, WRITENAME_HEIGHT+73))
+                        # Blit the input_box rect.
+                        pygame.draw.rect(self.screen, color, input_box, 2)
+
+                        pygame.display.flip()
+                        clock.tick(30)
+                        
+                    conf.register_highscore(text, self.score.get_score())
                 return False
+
 
     def draw_cooldown(self):
         pygame.draw.arc(self.screen, "ORANGE" if self.bullet_mode == 0 else "BLUE", 

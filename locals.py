@@ -70,6 +70,17 @@ BULLET2_SHOOT_ANGLE = [30,30,20,16] #degree
 BULLET2_SPEED = [4,6,8,10]
 GENERATE_SQUARE = [1,2,3,5]
 
+black = (0,0,0)
+white = (255,255,255)
+
+red = (200,0,0)
+green = (0,200,0)
+
+bright_red = (255,0,0)
+bright_green = (0,255,0)
+
+WRITENAME_WIDTH, WRITENAME_HEIGHT = (140,350)
+
 # R1 = [x1, y1, x2, y2]
 def isRectangleOverlap(R1, R2):
     if (R1[0] >= R2[2]) or (R1[2] <= R2[0]) or (R1[3] <= R2[1]) or (R1[1] >= R2[3]):
