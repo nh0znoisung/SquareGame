@@ -5,7 +5,7 @@ from locals import *
 
 
 class Square(pygame.sprite.Sprite):
-    def __init__(self, size=[50, 50], idx=-1, pos=[0, 100], speed=100, vector=[1, 1]):
+    def __init__(self, size=[50, 50], idx=-1, pos=[0, 100], speed=10, vector=[1, 1]):
         pygame.sprite.Sprite.__init__(self)
         if idx <= -1 or idx > 8:
             self.idx = random.randint(0, 8)
@@ -20,15 +20,18 @@ class Square(pygame.sprite.Sprite):
         self.image = self.origimage.copy()
 
         self.rect = self.image.get_rect(topleft=pos)
-        self.speed = speed
+        self.speed = speed*10
         self.vector = vector
-        self.nomalize()
+        self.normalize()
         self.position = pos
-        self.origpoint = self.point = SQUARE_POINT[self.idx]
+        self.point = SQUARE_POINT[self.idx]
 
-    def nomalize(self):
+    def normalize(self):
         ss = (self.vector[0] ** 2 + self.vector[1] ** 2) ** 0.5
         self.vector = [self.vector[0] / ss, self.vector[1] / ss]
+
+    def get_point(self):
+        return SQUARE_POINT[self.idx]
 
     def get_rect(self):
         return [

@@ -78,9 +78,12 @@ class Game:
         self.isGameOver = False
         self.scheduler = Game.Scheduler() 
         self.nextSquareTime = 5
+        self.level = 0
 
-
-        self.click_damage = 30
+        self.bullet_list = []
+        self.bullet_mode = 1
+        self.tic_bullet_1 = -1
+        self.click_damage = 200
         self.shields = Shields()
         self.score = Score()
         self.background = lib.draw_background()
@@ -90,7 +93,9 @@ class Game:
         self.playermoves = {"right": False, "left": False,'slash':False,'dash':False,'die':False}
 
         while True:
-
+            if self.score.get_score() >= LEVEL_SCORE_UPPER_BOUND[self.level]:
+                self.level += 1
+                print("Current level: ", self.level)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     raise SystemExit
@@ -102,6 +107,8 @@ class Game:
                         self.playermoves["right"] = key_down
                     elif event.key == pygame.K_LSHIFT:
                         self.playermoves['dash'] = key_down
+                    elif key_down and event.key == pygame.K_w:
+                        self.bullet_mode = 1 - self.bullet_mode
                     elif key_down and event.key == pygame.K_SPACE:
                         if not self.player.is_shield and self.shields.get_nums() > 0:
                             self.shields.subtract()
@@ -112,9 +119,37 @@ class Game:
                         pygame.event.clear()
                         return False
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    mousepos = pygame.mouse.get_pos()
+                    toc_bullet_1 = time.time()
+                    if toc_bullet_1 - self.tic_bullet_1 >= BULLET1_COOLDOWN[self.level]:
+                        pos=self.player.get_pos()
+                        pos=[pos[0]+20+(1-self.player.anim.animFlip)*30,pos[1]+30]
+                        self.shoot(mousepos, pos)
+                        if self.bullet_mode == 0:
+                            self.tic_bullet_1 = toc_bullet_1
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                     if not self.playermoves['slash']:
                         self.playermoves['slash']=True
                         sound.play("hit")
+
+            # Collision bullet and square
+            for bullet in self.bullet_list:
+                ok = False
+                for square in self.enemiesGroup:
+                    if isInsideRectangle(bullet.get_pos(), square.get_rect()):
+                        ok = True
+                        square.point -= bullet.damage
+                        if square.point <= 0:
+                            self.score.add(square.get_point())
+                            self.enemiesGroup.remove(square)	
+                if ok and bullet.mode == 1:
+                    self.bullet_list.remove(bullet)
+                        
+            # Remove bullet that is out of screen
+            for bullet in self.bullet_list:
+                pos_x, pos_y = bullet.get_pos()
+                if pos_x < 0 or pos_x > WIDTH or pos_y < 0 or pos_y > HEIGHT:
+                    self.bullet_list.remove(bullet)
 
             deltaTime = self.clock.tick(FRAME_RATE) / 1000.0
             self.draw(deltaTime)
@@ -138,7 +173,7 @@ class Game:
                     if lib.detect_collision(self.player.anim.swordSlashSprite, enemy):
                         enemy.point -= self.click_damage*deltaTime
                         if enemy.point <= 0:
-                            self.score.add(enemy.origpoint)
+                            self.score.add(enemy.get_point())
                             sound.play("explode")
                             enemy.kill()
 
@@ -148,22 +183,45 @@ class Game:
             if self.isGameOver and self.player.anim.dieDone>=2:
                 return False
 
-    def generate_square(self):
-        self.enemiesGroup.add(
-            Square(
-                size=[50, 50],
-                pos=[
-                    random.randint(0, WIDTH),
-                    random.randint(0, HEIGHT_UPPER_BOUND_SQUARE),
-                ],
-                vector=[random.uniform(0, 1), random.uniform(0, 1)],
-                speed=random.randint(50, 300),
-            )
-        )
-        if self.nextSquareTime>2:
-            self.nextSquareTime*=0.96
+    def draw_cooldown(self):
+        pygame.draw.arc(self.screen, "ORANGE" if self.bullet_mode == 0 else "BLUE", 
+        (self.player.curX-12+self.player.anim.animFlip*10, self.player.curY -5 , COOLDOWN_RADIUS, COOLDOWN_RADIUS),
+        0, (min(time.time() - self.tic_bullet_1, BULLET1_COOLDOWN[self.level])) * math.pi*2 / BULLET1_COOLDOWN[self.level], 
+        4)
+
+    def shoot(self, mousepos, player_pos):
+        vector = [mousepos[0] - player_pos[0], mousepos[1] - player_pos[1]]
+        if self.bullet_mode == 0:
+            self.shoot_bullet_1(player_pos, vector)
+        elif self.bullet_mode == 1:
+            self.shoot_bullet_2(player_pos, vector)
+            
+    def shoot_bullet_1(self, player_pos, vector):
+        self.bullet_list.append(Bullet(player_pos, vector, self.bullet_mode, BULLET1_SPEED[self.level], BULLET1_DAMAGE[self.level]))
+    
+    def shoot_bullet_2(self, player_pos, vector):
+        for i in range(BULLET2_SHOOT_NUMS[self.level]//2 + 1):
+            if i == 0:
+                self.shoot_bullet_2_util(player_pos, vector, 0)
+            else:
+                self.shoot_bullet_2_util(player_pos, vector, BULLET2_SHOOT_ANGLE[self.level]*i)
+                self.shoot_bullet_2_util(player_pos, vector, -BULLET2_SHOOT_ANGLE[self.level]*i)
+
+
+    def shoot_bullet_2_util(self, player_pos, vector, angel):
+        new_vector = rotateVector(vector, angel)
+        self.bullet_list.append(Bullet(player_pos, new_vector, self.bullet_mode, BULLET2_SPEED[self.level], BULLET2_DAMAGE[self.level]))
         
-        self.scheduler.addJob(self.nextSquareTime,self.generate_square)
+
+    def generate_square(self):
+        for i in range(random.randint(1,GENERATE_SQUARE[self.level])):
+            self.enemiesGroup.add(Square(size = [random.choice(SQUARE_SIZE)]*2, 
+                pos = [random.randint(0, WIDTH),random.randint(0, HEIGHT_UPPER_BOUND_SQUARE[self.level])], 
+                vector=[random.uniform(0, 1),random.uniform(0, 1)], 
+                speed=random.randint(SPEED_LOWER_BOUND_SQUARE[self.level], SPEED_UPPER_BOUND_SQUARE[self.level]),
+                idx = random.randint(INDEX_LOWER_BOUND_SQUARE[self.level], INDEX_UPPER_BOUND_SQUARE[self.level])))
+        
+        self.scheduler.addJob(PERIOD_GENRATE[self.level],self.generate_square)
 
     def spawn_player(self):
         self.player=Player(100, 450, 300)
@@ -187,13 +245,23 @@ class Game:
             self.playerGroup.draw(self.screen)
             if not self.player.anim.slashDone:
                 self.player.anim.swordSlashGroup.draw(self.screen)
-        # Shield
+
+        # Shield Player
         self.player.draw_shield(self.screen)
+
+        #Cooldown
+        self.draw_cooldown()
+
+        #Bullet
+        for bullet in self.bullet_list:
+            bullet.update(self.screen)
+
+        #Shield
+        self.shields.draw(self.screen)
 
         # Score
         self.score.update(self.screen)
 
-        self.shields.draw(self.screen)
 
         pygame.display.update()
 

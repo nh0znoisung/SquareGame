@@ -137,7 +137,7 @@ class Player(pygame.sprite.Sprite):
 
         self.image = self.anim.getSprite()
         self.rect = self.image.get_rect(topleft=(initialX,initialY))
-        self.pos = [initialX,initialY]
+        self.curX,self.curY = initialX,initialY
         self.v=0
         self.acceleration = acceleration
         self.is_shield = False
@@ -149,15 +149,16 @@ class Player(pygame.sprite.Sprite):
         if self.is_shield:
             pygame.draw.circle(
                 screen,
-                "YELLOW",
+                "WHITE",
                 (
-                    self.pos[0] + PLAYER_SIZE[0] / 2 -7,
-                    self.pos[1] + PLAYER_SIZE[1] / 2 ,
+                    self.curX + PLAYER_SIZE[0] / 2 -7 +self.anim.animFlip*10,
+                    self.curY + PLAYER_SIZE[1] / 2 ,
                 ),
-                60,
+                65,
                 5,
             )
-
+    def get_pos(self):
+        return [self.curX, self.curY]
     def update(self, deltaTime, playermoves):
         self.v=0
         
@@ -187,9 +188,9 @@ class Player(pygame.sprite.Sprite):
                 else:
                     self.anim.goIdle()
 
-        self.pos[0]+=self.v*deltaTime
-        self.pos[0]=max(0,self.pos[0])
-        self.pos[0]=min(WIDTH - PLAYER_SIZE[0],self.pos[0])
+        self.curX+=self.v*deltaTime
+        self.curX=max(0,self.curX)
+        self.curX=min(WIDTH - PLAYER_SIZE[0],self.curX)
 
         self.image = self.anim.getSprite(deltaTime)
-        self.rect.topleft = self.pos
+        self.rect.topleft = (self.curX, self.curY)
