@@ -8,7 +8,7 @@ class Score:
         self.text = self.font.render("Score: " + str(self.score), True, "WHITE")
     
     def display(self, screen):
-        screen.blit(self.text, (BAR_HEIGHT, BAR_HEIGHT))
+        screen.blit(self.text, (WIDTH_BAR, SCORE_BAR_HEIGHT))
     
     def update(self, screen):
         self.display(screen)

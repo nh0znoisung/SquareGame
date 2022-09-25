@@ -6,10 +6,12 @@ from pygame.locals import *
 import time
 from collections import defaultdict
 
+pygame.mixer.pre_init(44100, -16, 2, 1024 * 3)
 pygame.init()
 
 from Shields import Shields
 from Score import Score
+from Timer import Timer
 
 # ----Player----
 from Player import Player
@@ -90,7 +92,7 @@ class Game:
                     self.is_pause = False
                     sound.play("music")
             #gameDisplay.fill(white)
-
+            self.clock.tick(FRAME_RATE)
             pygame.display.update()
 
     def play(self):
@@ -109,6 +111,7 @@ class Game:
         self.click_damage = 200
         self.shields = Shields()
         self.score = Score()
+        self.timer = Timer()
         self.background = lib.draw_background_main()
         self.spawn_player()
         self.generate_square()
@@ -142,23 +145,25 @@ class Game:
                     elif key_down and event.key == pygame.K_ESCAPE:
                         self.is_pause = True
                         self.paused()
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #left-click
-                    mousepos = pygame.mouse.get_pos()
-                    toc_bullet_1 = time.time()
-                    if toc_bullet_1 - self.tic_bullet_1 >= BULLET1_COOLDOWN[self.level]:
-                        pos=self.player.get_pos()
-                        pos=[pos[0]+20+(1-self.player.anim.animFlip)*30,pos[1]+30]
-                        self.shoot(mousepos, pos)
-                        #sound play
-                        if self.bullet_mode == 0:
-                            sound.play("bullet1")
-                        elif self.bullet_mode == 1:
-                            sound.play("bullet2")
-                        #reset tic
-                        if self.bullet_mode == 0:
-                            self.tic_bullet_1 = toc_bullet_1
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3: #right-click
-                    if not self.playermoves['slash']:
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.isGameOver:
+                        pass
+                    elif event.button == 1: #left-click
+                        mousepos = pygame.mouse.get_pos()
+                        toc_bullet_1 = time.time()
+                        if toc_bullet_1 - self.tic_bullet_1 >= BULLET1_COOLDOWN[self.level]:
+                            pos=self.player.get_pos()
+                            pos=[pos[0]+20+(1-self.player.anim.animFlip)*30,pos[1]+30]
+                            self.shoot(mousepos, pos)
+                            #sound play
+                            if self.bullet_mode == 0:
+                                sound.play("bullet1")
+                            elif self.bullet_mode == 1:
+                                sound.play("bullet2")
+                            #reset tic
+                            if self.bullet_mode == 0:
+                                self.tic_bullet_1 = toc_bullet_1
+                    elif event.button == 3: #right-click
                         self.playermoves['slash']=True
 
 
@@ -350,6 +355,9 @@ class Game:
 
         # Score
         self.score.update(self.screen)
+
+        # Timer
+        self.timer.update(self.screen)
 
 
         pygame.display.update()
