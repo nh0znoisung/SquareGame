@@ -9,6 +9,8 @@ pygame.init()
 
 from Shields import Shields
 from Score import Score
+from Timer import Timer
+from HitCount import HitCount
 
 # ----Player----
 from Player import Player
@@ -53,7 +55,7 @@ class Game:
     def set_screen(self):
         """Sets (resets) the self.screen variable with the proper fullscreen"""
         if conf.fullscreen:
-            fullscreen = pygame.FULLSCREEN | pygame.SCALED
+            fullscreen = pygame.FULLSCREEN
         else:
             fullscreen = 0
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), fullscreen)
@@ -114,6 +116,9 @@ class Game:
         self.click_damage = 200
         self.shields = Shields()
         self.score = Score()
+        self.timer = Timer()
+        self.hit_count = HitCount()
+        self.slash_hit = False
         self.background = lib.draw_background_main()
         self.spawn_player()
         self.generate_square()
@@ -163,6 +168,8 @@ class Game:
                         self.playermoves["shoot"] = True
                     elif event.button == 3:  # right-click
                         self.playermoves["slash"] = True
+                        self.hit_count.add_total(1)
+                        self.slash_hit = False
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     self.playermoves["shoot"] = False
 
@@ -176,6 +183,10 @@ class Game:
                         if square.point <= 0:
                             self.score.add(square.get_point())
                             square.kill()
+                if ok and not bullet.is_hit:
+                    self.hit_count.add_hit(1)
+                    bullet.is_hit = True
+
                 if ok and bullet.mode == 1:
                     self.bullet_list.remove(bullet)
 
@@ -204,6 +215,9 @@ class Game:
                     self.player.anim.swordSlashSprite, self.enemiesGroup, False
                 ):
                     if lib.detect_collision(self.player.anim.swordSlashSprite, enemy):
+                        if not self.slash_hit:
+                            self.hit_count.add_hit(1)
+                            self.slash_hit = True
                         enemy.point -= (
                             self.click_damage * deltaTime * SLASH_DAMAGE[self.level]
                         )
@@ -216,6 +230,7 @@ class Game:
             if self.isGameOver and self.player.anim.dieDone >= 2:
                 self.gameOver()
                 return False
+            self.timer.add_timer(deltaTime)
 
     def gameOver(self):
         if conf.is_highscore(self.score.get_score()):
@@ -327,7 +342,7 @@ class Game:
             if self.bullet_mode == 0 and self.player.useStamina(99.9):
                 self.shoot(mousepos, pos)
                 sound.play("bullet1")
-            elif self.bullet_mode == 1 and self.player.useStamina(50.0):
+            elif self.bullet_mode == 1 and self.player.useStamina(33.3):
                 self.shoot(mousepos, pos)
                 sound.play("bullet2")
             if not conf.turbo:
@@ -337,8 +352,10 @@ class Game:
         vector = [mousepos[0] - player_pos[0], mousepos[1] - player_pos[1]]
         if self.bullet_mode == 0:
             self.shoot_bullet_1(player_pos, vector)
+            self.hit_count.add_total(1)
         elif self.bullet_mode == 1:
             self.shoot_bullet_2(player_pos, vector)
+            self.hit_count.add_total(3)
 
     def shoot_bullet_1(self, player_pos, vector):
         self.bullet_list.append(
@@ -439,6 +456,12 @@ class Game:
 
         # Score
         self.score.update(self.screen)
+
+        # Timer
+        self.timer.update(self.screen)
+
+        # HitCount
+        self.hit_count.update(self.screen)
 
         pygame.display.update()
 

@@ -1,4 +1,3 @@
-
 import pygame
 
 from locals import *
@@ -8,15 +7,14 @@ import lib
 
 
 class __Sound(object):
-    
     def __init__(self):
-        
+
         self._sounds = {}
-        
+
         for filename in SOUND_FILES:
-            sound = filename.rsplit('.', 1)[0]
+            sound = filename.rsplit(".", 1)[0]
             self._sounds[sound] = pygame.mixer.Sound(lib.filename(filename))
-        
+
     def play(self, sound, times=0):
         if conf.sound:
             try:
@@ -24,18 +22,19 @@ class __Sound(object):
                 self._sounds[sound].play(times)
             except KeyError as e:
                 raise AttributeError("Invalid sound %s." % sound)
-        
+
     def stop(self, sound):
         try:
             self._sounds[sound].stop()
         except KeyError as e:
             pass
-    
+
     def stop_all(self):
-        for k,v in self._sounds.items():
+        for k, v in self._sounds.items():
             try:
                 v.stop()
             except:
                 pass
+
 
 sound = __Sound()

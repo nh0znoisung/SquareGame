@@ -1,5 +1,3 @@
-import sys
-
 import pygame
 
 import lib
@@ -30,7 +28,7 @@ class Menu(object):
     BACK = "Return to Main Menu"
 
     OPTIONS_OPTIONS = [FULLSCREEN, SOUND, TURBO, BACK]
-    OPTIONS_CONF = {FULLSCREEN: "fullscreen", SOUND: "sound",TURBO: "turbo"}
+    OPTIONS_CONF = {FULLSCREEN: "fullscreen", SOUND: "sound", TURBO: "turbo"}
 
     NOSCORES = "There are no scores available at this time"
 
@@ -237,7 +235,6 @@ Controls:
             # Flip bool value in conf
             attr = not getattr(conf, self.OPTIONS_CONF[selection])
             setattr(conf, self.OPTIONS_CONF[selection], attr)
-            # Handle special case stuff
             if selection == self.FULLSCREEN:
                 self.game.set_screen()
             elif selection == self.SOUND:
