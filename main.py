@@ -53,7 +53,7 @@ class Game:
     def set_screen(self):
         """Sets (resets) the self.screen variable with the proper fullscreen"""
         if conf.fullscreen:
-            fullscreen = pygame.FULLSCREEN
+            fullscreen = pygame.FULLSCREEN | pygame.SCALED
         else:
             fullscreen = 0
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), fullscreen)
