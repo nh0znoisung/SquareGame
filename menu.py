@@ -24,13 +24,13 @@ class Menu(object):
 
     MAIN_OPTIONS = [START, OPTIONS, SCORES, HELP, QUIT]
 
-    EFFECTS = "Extra Effects"
     FULLSCREEN = "Fullscreen Mode"
     SOUND = "Sounds"
+    TURBO = "Turbo Mode"
     BACK = "Return to Main Menu"
 
-    OPTIONS_OPTIONS = [FULLSCREEN, SOUND, BACK]
-    OPTIONS_CONF = {FULLSCREEN: "fullscreen", SOUND: "sound"}
+    OPTIONS_OPTIONS = [FULLSCREEN, SOUND, TURBO, BACK]
+    OPTIONS_CONF = {FULLSCREEN: "fullscreen", SOUND: "sound",TURBO: "turbo"}
 
     NOSCORES = "There are no scores available at this time"
 

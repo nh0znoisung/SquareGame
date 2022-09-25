@@ -330,6 +330,8 @@ class Game:
             elif self.bullet_mode == 1 and self.player.useStamina(50.0):
                 self.shoot(mousepos, pos)
                 sound.play("bullet2")
+            if not conf.turbo:
+                self.playermoves["shoot"] = False
 
     def shoot(self, mousepos, player_pos):
         vector = [mousepos[0] - player_pos[0], mousepos[1] - player_pos[1]]
