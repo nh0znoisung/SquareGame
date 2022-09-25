@@ -143,23 +143,25 @@ class Game:
                     elif key_down and event.key == pygame.K_ESCAPE:
                         self.is_pause = True
                         self.paused()
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: #left-click
-                    mousepos = pygame.mouse.get_pos()
-                    toc_bullet_1 = time.time()
-                    if toc_bullet_1 - self.tic_bullet_1 >= BULLET1_COOLDOWN[self.level]:
-                        pos=self.player.get_pos()
-                        pos=[pos[0]+20+(1-self.player.anim.animFlip)*30,pos[1]+30]
-                        self.shoot(mousepos, pos)
-                        #sound play
-                        if self.bullet_mode == 0:
-                            sound.play("bullet1")
-                        elif self.bullet_mode == 1:
-                            sound.play("bullet2")
-                        #reset tic
-                        if self.bullet_mode == 0:
-                            self.tic_bullet_1 = toc_bullet_1
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3: #right-click
-                    if not self.playermoves['slash']:
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.isGameOver:
+                        pass
+                    elif event.button == 1: #left-click
+                        mousepos = pygame.mouse.get_pos()
+                        toc_bullet_1 = time.time()
+                        if toc_bullet_1 - self.tic_bullet_1 >= BULLET1_COOLDOWN[self.level]:
+                            pos=self.player.get_pos()
+                            pos=[pos[0]+20+(1-self.player.anim.animFlip)*30,pos[1]+30]
+                            self.shoot(mousepos, pos)
+                            #sound play
+                            if self.bullet_mode == 0:
+                                sound.play("bullet1")
+                            elif self.bullet_mode == 1:
+                                sound.play("bullet2")
+                            #reset tic
+                            if self.bullet_mode == 0:
+                                self.tic_bullet_1 = toc_bullet_1
+                    elif event.button == 3: #right-click
                         self.playermoves['slash']=True
 
 
