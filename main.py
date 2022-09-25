@@ -6,6 +6,7 @@ from pygame.locals import *
 import time
 from collections import defaultdict
 
+pygame.mixer.pre_init(44100, -16, 2, 1024 * 3)
 pygame.init()
 
 from Shields import Shields
@@ -90,7 +91,7 @@ class Game:
                     self.is_pause = False
                     sound.play("music")
             #gameDisplay.fill(white)
-
+            self.clock.tick(FRAME_RATE)
             pygame.display.update()
 
     def play(self):
