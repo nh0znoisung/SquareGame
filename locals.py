@@ -73,7 +73,7 @@ BULLET2_SHOOT_NUMS = [3,3,3,5] #odd number
 BULLET2_SHOOT_ANGLE = [30,30,20,16] #degree
 BULLET2_SPEED = [4,6,8,10]
 GENERATE_SQUARE = [1,2,3,5]
-SLASH_DAMAGE = [0.3, 0.5, 0.75, 1]
+SLASH_DAMAGE = [0.2, 0.35, 0.6, 0.9]
 
 black = (0,0,0)
 white = (255,255,255)
