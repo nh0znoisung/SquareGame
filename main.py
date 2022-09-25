@@ -90,7 +90,7 @@ class Game:
                     self.is_pause = False
                     sound.play("music")
             #gameDisplay.fill(white)
-
+            self.clock.tick(FRAME_RATE)
             pygame.display.update()
 
     def play(self):
