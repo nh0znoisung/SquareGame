@@ -11,6 +11,7 @@ pygame.init()
 
 from Shields import Shields
 from Score import Score
+from Timer import Timer
 
 # ----Player----
 from Player import Player
@@ -110,6 +111,7 @@ class Game:
         self.click_damage = 200
         self.shields = Shields()
         self.score = Score()
+        self.timer = Timer()
         self.background = lib.draw_background_main()
         self.spawn_player()
         self.generate_square()
@@ -353,6 +355,9 @@ class Game:
 
         # Score
         self.score.update(self.screen)
+
+        # Timer
+        self.timer.update(self.screen)
 
 
         pygame.display.update()
