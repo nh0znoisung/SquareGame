@@ -5,7 +5,6 @@ class __Config(object):
     
     # This is essentially the API
     DEFAULT = {'highscores': [], 
-               'fullscreen': False,
                'sound': True}
     
     MAX_NAME_LEN = 10

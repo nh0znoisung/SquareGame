@@ -1,7 +1,2 @@
 Phi: 40
 Quang: 15
-sfasfasf: 0
-HelloWorld: 145
-1adsasd: 0
-aasdasdada: 0
-: 0
