@@ -15,5 +15,5 @@ class Timer:
         self.text = self.font.render("Time: {}s".format(self.time), True, "WHITE")
     
     def add_timer(self, time):
-        self.time = time
+        self.time += time
 

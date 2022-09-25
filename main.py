@@ -108,6 +108,7 @@ class Game:
         self.bullet_list = []
         self.bullet_mode = 1
         self.tic_bullet_1 = -1
+        self.tic_timer = time.time()
         self.click_damage = 200
         self.shields = Shields()
         self.score = Score()
@@ -145,6 +146,7 @@ class Game:
                     elif key_down and event.key == pygame.K_ESCAPE:
                         self.is_pause = True
                         self.paused()
+                        self.tic_timer = time.time()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if self.isGameOver:
                         pass
@@ -212,6 +214,11 @@ class Game:
 
             
             self.scheduler.proccess()
+
+            # update timer 
+            toc_timer = time.time()
+            self.timer.add_timer(toc_timer - self.tic_timer)
+            self.tic_timer = toc_timer
 
             if self.isGameOver and self.player.anim.dieDone>=2:
                 if conf.is_highscore(self.score.get_score()):
