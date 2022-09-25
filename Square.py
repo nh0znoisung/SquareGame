@@ -2,7 +2,7 @@ import random
 import pygame
 import math
 from locals import *
-
+from sound import sound
 
 class Square(pygame.sprite.Sprite):
     def __init__(self, size=[50, 50], idx=-1, pos=[0, 100], speed=10, vector=[1, 1]):
@@ -63,3 +63,8 @@ class Square(pygame.sprite.Sprite):
             self.vector[1] = -self.vector[1]
         elif self.position[1] >= HEIGHT - self.size[1] and self.vector[1] > 0:
             self.vector[1] = -self.vector[1]
+
+    def kill(self):
+        super().kill()
+        sound.play('explode')
+        

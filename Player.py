@@ -1,4 +1,5 @@
 import pygame
+from sound import sound
 
 from locals import *
 
@@ -77,6 +78,7 @@ class Player(pygame.sprite.Sprite):
                 self.animDuration = 0.4
                 self.slashDone=False
                 self.swordSlashSpritePos=pygame.mouse.get_pos()
+                sound.play("slash")
 
         def goDash(self):
             if self.curAnim is not self.dash:
@@ -85,6 +87,7 @@ class Player(pygame.sprite.Sprite):
                 self.animTime = 0
                 self.animDuration = 0.2
                 self.dashDone=0
+                sound.play('dash')
 
         def goDie(self):
             if self.curAnim is not self.die:
@@ -93,6 +96,7 @@ class Player(pygame.sprite.Sprite):
                 self.animTime = 0
                 self.animDuration = 1
                 self.dieDone=0
+                sound.play("die")
 
         def getSprite(self, delta=0)->pygame.Surface:
             self.animTime += delta
