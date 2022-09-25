@@ -25,11 +25,12 @@ class Menu(object):
     MAIN_OPTIONS = [START, OPTIONS, SCORES, HELP, QUIT]
 
     EFFECTS = "Extra Effects"
+    FULLSCREEN = "Fullscreen Mode"
     SOUND = "Sounds"
     BACK = "Return to Main Menu"
 
-    OPTIONS_OPTIONS = [SOUND, BACK]
-    OPTIONS_CONF = {SOUND: "sound"}
+    OPTIONS_OPTIONS = [FULLSCREEN, SOUND, BACK]
+    OPTIONS_CONF = {FULLSCREEN: "fullscreen", SOUND: "sound"}
 
     NOSCORES = "There are no scores available at this time"
 
@@ -236,7 +237,9 @@ Controls:
             # Flip bool value in conf
             attr = not getattr(conf, self.OPTIONS_CONF[selection])
             setattr(conf, self.OPTIONS_CONF[selection], attr)
-            if selection == self.SOUND:
+            if selection == self.FULLSCREEN:
+                self.game.set_screen()
+            elif selection == self.SOUND:
                 # will stop and replay if enabled
                 sound.stop_all()
                 sound.play("title", -1)

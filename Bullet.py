@@ -13,6 +13,7 @@ class Bullet:
         self.normalize()
         self.speed = speed
         self.damage = damage
+        self.is_hit = False
         if mode < 0 or mode >= BULLET_TYPE_NUMS:
             self.mode = 0
         else:

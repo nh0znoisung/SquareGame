@@ -9,7 +9,7 @@ class Shields:
         self.shield = pygame.transform.scale(self.shield, SHIELD_SIZE)
     
     def display(self, screen, idx):
-        screen.blit(self.shield, (WIDTH - int(idx) * (SHIELD_SIZE[0] + SHIELD_DELTA_SPACE) , BAR_HEIGHT))
+        screen.blit(self.shield, (WIDTH - int(idx) * (SHIELD_SIZE[0] + SHIELD_DELTA_SPACE) , SHIELD_BAR_WIDTH))
 
     def draw(self, screen):
         for i in range(self.nums):

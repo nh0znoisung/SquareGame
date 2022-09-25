@@ -12,6 +12,7 @@ pygame.init()
 from Shields import Shields
 from Score import Score
 from Timer import Timer
+from HitCount import HitCount
 
 # ----Player----
 from Player import Player
@@ -113,6 +114,8 @@ class Game:
         self.shields = Shields()
         self.score = Score()
         self.timer = Timer()
+        self.hit_count = HitCount()
+        self.slash_hit = False
         self.background = lib.draw_background_main()
         self.spawn_player()
         self.generate_square()
@@ -167,6 +170,8 @@ class Game:
                                 self.tic_bullet_1 = toc_bullet_1
                     elif event.button == 3: #right-click
                         self.playermoves['slash']=True
+                        self.hit_count.add_total(1)
+                        self.slash_hit = False
 
 
             # Collision bullet and square
@@ -179,6 +184,10 @@ class Game:
                         if square.point <= 0:
                             self.score.add(square.get_point())
                             square.kill()
+                if ok and not bullet.is_hit:
+                    self.hit_count.add_hit(1)
+                    bullet.is_hit = True
+                    
                 if ok and bullet.mode == 1:
                     self.bullet_list.remove(bullet)
                         
@@ -207,18 +216,23 @@ class Game:
                     self.player.anim.swordSlashSprite, self.enemiesGroup, False
                 ):
                     if lib.detect_collision(self.player.anim.swordSlashSprite, enemy):
+                        if not self.slash_hit:
+                            self.hit_count.add_hit(1)
+                            self.slash_hit = True
                         enemy.point -= self.click_damage*deltaTime*SLASH_DAMAGE[self.level]
                         if enemy.point <= 0:
                             self.score.add(enemy.get_point())
                             enemy.kill()
-
+                            ok = True
+                    
             
             self.scheduler.proccess()
 
-            # update timer 
-            toc_timer = time.time()
-            self.timer.add_timer(toc_timer - self.tic_timer)
-            self.tic_timer = toc_timer
+            if not self.isGameOver:
+                # update timer 
+                toc_timer = time.time()
+                self.timer.add_timer(toc_timer - self.tic_timer)
+                self.tic_timer = toc_timer
 
             if self.isGameOver and self.player.anim.dieDone>=2:
                 if conf.is_highscore(self.score.get_score()):
@@ -295,8 +309,10 @@ class Game:
         vector = [mousepos[0] - player_pos[0], mousepos[1] - player_pos[1]]
         if self.bullet_mode == 0:
             self.shoot_bullet_1(player_pos, vector)
+            self.hit_count.add_total(1)
         elif self.bullet_mode == 1:
             self.shoot_bullet_2(player_pos, vector)
+            self.hit_count.add_total(3)
             
     def shoot_bullet_1(self, player_pos, vector):
         self.bullet_list.append(Bullet(player_pos, vector, self.bullet_mode, BULLET1_SPEED[self.level], BULLET1_DAMAGE[self.level]))
@@ -360,11 +376,14 @@ class Game:
         #Shield
         self.shields.draw(self.screen)
 
-        # Score
+        #Score
         self.score.update(self.screen)
 
-        # Timer
+        #Timer
         self.timer.update(self.screen)
+
+        #HitCount
+        self.hit_count.update(self.screen)
 
 
         pygame.display.update()
