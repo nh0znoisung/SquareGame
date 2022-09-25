@@ -15,7 +15,8 @@ SOUND_FILES = (
     "music.mp3",
     "title.mp3",
     "die.wav",
-    "hit.wav",
+    "slash.wav",
+    "dash.wav",
     "menu_choosing.wav",
     "menu_picked.wav",
     "menu_switch.wav",
@@ -59,8 +60,8 @@ SQUARE_POINT = [25,35,45,55,70,95,120,150,200]
 LEVEL_SCORE_UPPER_BOUND = [100, 400, 1000, sys.maxsize]
 LEVEL_NUMS = 4
 HEIGHT_UPPER_BOUND_SQUARE = [220,255,385,325]
-SPEED_LOWER_BOUND_SQUARE = [6,10,12,14]
-SPEED_UPPER_BOUND_SQUARE = [10,16,18,20]
+SPEED_LOWER_BOUND_SQUARE = [100, 150, 200, 225]
+SPEED_UPPER_BOUND_SQUARE = [150, 200, 225, 250]
 INDEX_LOWER_BOUND_SQUARE = [0,1,3,5]
 INDEX_UPPER_BOUND_SQUARE = [2,4,6,8]
 PERIOD_GENRATE = [8.5,8,7,6]

@@ -20,7 +20,7 @@ class Square(pygame.sprite.Sprite):
         self.image = self.origimage.copy()
 
         self.rect = self.image.get_rect(topleft=pos)
-        self.speed = speed*10
+        self.speed = speed
         self.vector = vector
         self.normalize()
         self.position = pos

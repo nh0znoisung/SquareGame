@@ -129,6 +129,7 @@ class Game:
                         self.playermoves["right"] = key_down
                     elif event.key == pygame.K_LSHIFT:
                         self.playermoves['dash'] = key_down
+                        if key_down and not self.isGameOver: sound.play('dash')
                     elif key_down and event.key == pygame.K_w:
                         self.bullet_mode = 1 - self.bullet_mode
                     elif key_down and event.key == pygame.K_SPACE:
@@ -159,7 +160,7 @@ class Game:
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3: #right-click
                     if not self.playermoves['slash']:
                         self.playermoves['slash']=True
-                        sound.play("hit")
+                        sound.play("slash")
 
             # Collision bullet and square
             for bullet in self.bullet_list:
@@ -218,8 +219,8 @@ class Game:
                     input_box = pygame.Rect(WIDTH/2-INPUT_WIDTH/2, 500-INPUT_HEIGHT/2, INPUT_WIDTH, INPUT_HEIGHT)
                     color_inactive = pygame.Color('lightskyblue3')
                     color_active = pygame.Color('dodgerblue2')
-                    color = color_inactive
                     active = True # Default on selected
+                    color = color_active
                     text = ''
                     done = False
 
@@ -231,7 +232,7 @@ class Game:
                                 # If the user clicked on the input_box rect.
                                 if input_box.collidepoint(event.pos):
                                     # Toggle the active variable.
-                                    active = not active
+                                    active = True
                                 else:
                                     active = False
                                 # Change the current color of the input box.
@@ -242,7 +243,7 @@ class Game:
                                         done = True
                                     elif event.key == pygame.K_BACKSPACE:
                                         text = text[:-1]
-                                    elif event.key == pygame.K_SPACE:
+                                    elif event.key != pygame.K_SPACE:
                                         text += event.unicode
                         background_image = pygame.image.load("data/gameover.png")
                         background_size = [400, 400]
@@ -262,6 +263,10 @@ class Game:
                         
                         # Blit the input_box rect
                         pygame.draw.rect(self.screen, color, input_box, 2)
+
+                        # Blit the current text.
+                        txt_surface = font.render(text, True, color)
+                        self.screen.blit(txt_surface, (input_box[0]+5, input_box[1]+5))
 
                         pygame.display.flip()
                         clock.tick(30)
