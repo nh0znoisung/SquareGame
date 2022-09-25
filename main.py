@@ -5,6 +5,9 @@ import pygame
 from pygame.locals import *
 import time
 from collections import defaultdict
+
+pygame.init()
+
 from Shields import Shields
 from Score import Score
 
@@ -12,8 +15,6 @@ from Score import Score
 from Player import Player
 from Square import Square
 from Bullet import Bullet
-
-pygame.init()
 
 import lib
 
@@ -51,7 +52,11 @@ class Game:
 
     def set_screen(self):
         """Sets (resets) the self.screen variable with the proper fullscreen"""
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), 0)
+        if conf.fullscreen:
+            fullscreen = pygame.FULLSCREEN
+        else:
+            fullscreen = 0
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), fullscreen)
 
     def begin(self):
 
@@ -125,7 +130,6 @@ class Game:
                         self.playermoves["right"] = key_down
                     elif event.key == pygame.K_LSHIFT:
                         self.playermoves['dash'] = key_down
-                        if key_down and not self.isGameOver: sound.play('dash')
                     elif key_down and event.key == pygame.K_w:
                         self.bullet_mode = 1 - self.bullet_mode
                     elif key_down and event.key == pygame.K_SPACE:
@@ -156,7 +160,7 @@ class Game:
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3: #right-click
                     if not self.playermoves['slash']:
                         self.playermoves['slash']=True
-                        sound.play("slash")
+
 
             # Collision bullet and square
             for bullet in self.bullet_list:
@@ -167,7 +171,7 @@ class Game:
                         square.point -= bullet.damage
                         if square.point <= 0:
                             self.score.add(square.get_point())
-                            self.enemiesGroup.remove(square)	
+                            square.kill()
                 if ok and bullet.mode == 1:
                     self.bullet_list.remove(bullet)
                         
@@ -187,7 +191,6 @@ class Game:
                 ):
                     if lib.detect_collision(self.player, enemy):
                         if not self.player.is_shield:
-                            sound.play("die")
                             self.playermoves['die']=True
                             self.isGameOver=True
 
@@ -200,7 +203,6 @@ class Game:
                         enemy.point -= self.click_damage*deltaTime*SLASH_DAMAGE[self.level]
                         if enemy.point <= 0:
                             self.score.add(enemy.get_point())
-                            sound.play("explode")
                             enemy.kill()
 
             
