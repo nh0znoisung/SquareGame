@@ -55,7 +55,7 @@ class Game:
     def set_screen(self):
         """Sets (resets) the self.screen variable with the proper fullscreen"""
         if conf.fullscreen:
-            fullscreen = pygame.FULLSCREEN
+            fullscreen = pygame.FULLSCREEN | pygame.SCALED
         else:
             fullscreen = 0
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT), fullscreen)
@@ -342,7 +342,7 @@ class Game:
             if self.bullet_mode == 0 and self.player.useStamina(99.9):
                 self.shoot(mousepos, pos)
                 sound.play("bullet1")
-            elif self.bullet_mode == 1 and self.player.useStamina(33.3):
+            elif self.bullet_mode == 1 and self.player.useStamina(25.0):
                 self.shoot(mousepos, pos)
                 sound.play("bullet2")
             if not conf.turbo:

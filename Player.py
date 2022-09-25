@@ -95,8 +95,9 @@ class Player(pygame.sprite.Sprite):
                 self.animTime = 0
                 self.animDuration = 1.0
 
-        def goSlash(self):
+        def goSlash(self,player):
             if self.curAnim is not self.slash:
+                if not player.useStamina(50): return
                 self.curAnim = self.slash
                 self.animSpriteOffset = 0
                 self.animTime = 0
@@ -214,7 +215,7 @@ class Player(pygame.sprite.Sprite):
         if playermoves["die"]:
             self.anim.goDie()
         elif playermoves["slash"]:
-            self.anim.goSlash()
+            self.anim.goSlash(self)
             if self.anim.slashDone:
                 playermoves["slash"] = False
                 self.anim.goIdle()
@@ -226,7 +227,7 @@ class Player(pygame.sprite.Sprite):
             if playermoves["dash"]:
                 self.v = self.acceleration * (1 - 2 * self.anim.animFlip) * 2
                 self.anim.goDash()
-                if self.anim.dashDone >= 2:
+                if not self.useStamina(250.0*deltaTime) or self.anim.dashDone >= 2 :
                     playermoves["dash"] = False
                     self.anim.goIdle()
             else:
