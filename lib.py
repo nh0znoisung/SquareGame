@@ -49,10 +49,12 @@ def draw_background_main():
     background = pygame.image.load("data/bg_main.png")
     return background
 
+
 def draw_background_menu():
     """Render the background for menu screen."""
     background = pygame.image.load("data/bg_menu.png")
     return background
+
 
 def filename(name):
     """Get the path of a data file"""

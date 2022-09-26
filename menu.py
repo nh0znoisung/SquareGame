@@ -1,5 +1,3 @@
-import sys
-
 import pygame
 
 import lib
@@ -24,13 +22,13 @@ class Menu(object):
 
     MAIN_OPTIONS = [START, OPTIONS, SCORES, HELP, QUIT]
 
-    EFFECTS = "Extra Effects"
     FULLSCREEN = "Fullscreen Mode"
     SOUND = "Sounds"
+    TURBO = "Turbo Mode"
     BACK = "Return to Main Menu"
 
-    OPTIONS_OPTIONS = [FULLSCREEN, SOUND, BACK]
-    OPTIONS_CONF = {FULLSCREEN: "fullscreen", SOUND: "sound"}
+    OPTIONS_OPTIONS = [FULLSCREEN, SOUND, TURBO, BACK]
+    OPTIONS_CONF = {FULLSCREEN: "fullscreen", SOUND: "sound", TURBO: "turbo"}
 
     NOSCORES = "There are no scores available at this time"
 
@@ -43,11 +41,8 @@ class Menu(object):
     HELP_TEXT = """\
 Controls:
 
-      Button A or Left Arrow
-            Move player left
-
-      Button D or Right Arrow
-            Move player right
+      Button A/Left, D/Right
+            Move player left, right
 
       Button Shift
             Move player dashing toward the current direction 
@@ -60,6 +55,9 @@ Controls:
 
       Mouse Right Click
             Shoot the squares swordslash
+    
+      Button Space
+            Activate shield
 
       ESC in game screen
             Pause the game or exit the main menu"""
@@ -237,7 +235,6 @@ Controls:
             # Flip bool value in conf
             attr = not getattr(conf, self.OPTIONS_CONF[selection])
             setattr(conf, self.OPTIONS_CONF[selection], attr)
-            # Handle special case stuff
             if selection == self.FULLSCREEN:
                 self.game.set_screen()
             elif selection == self.SOUND:

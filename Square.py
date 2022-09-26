@@ -4,6 +4,7 @@ import math
 from locals import *
 from sound import sound
 
+
 class Square(pygame.sprite.Sprite):
     def __init__(self, size=[50, 50], idx=-1, pos=[0, 100], speed=10, vector=[1, 1]):
         pygame.sprite.Sprite.__init__(self)
@@ -42,11 +43,19 @@ class Square(pygame.sprite.Sprite):
         ]
 
     def displayPoint(self):
-        pointFont = pygame.font.SysFont("CopperPlate Gothic", int(23*self.size[0]/40), bold=True)
+        pointFont = pygame.font.SysFont(
+            "CopperPlate Gothic", int(23 * self.size[0] / 40), bold=True
+        )
         pointText = pointFont.render(str(math.ceil(self.point)), True, "black")
         pointTextSize = pointFont.size(str(math.ceil(self.point)))
         self.image = self.origimage.copy()
-        self.image.blit(pointText, (self.size[0]/2 - pointTextSize[0]/2, self.size[1]/2 - pointTextSize[1]/2))
+        self.image.blit(
+            pointText,
+            (
+                self.size[0] / 2 - pointTextSize[0] / 2,
+                self.size[1] / 2 - pointTextSize[1] / 2,
+            ),
+        )
 
     def update(self, delta):
         self.displayPoint()
@@ -66,5 +75,4 @@ class Square(pygame.sprite.Sprite):
 
     def kill(self):
         super().kill()
-        sound.play('explode')
-        
+        sound.play("explode")

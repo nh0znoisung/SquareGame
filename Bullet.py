@@ -2,17 +2,17 @@ import pygame
 import math
 from locals import *
 
-
-
 # ultimate
 
+
 class Bullet:
-    def __init__(self, pos, vector=[1,1], mode=0, speed=5, damage=1):
+    def __init__(self, pos, vector=[1, 1], mode=0, speed=5, damage=1):
         self.pos = pos.copy()
         self.vector = vector.copy()
         self.normalize()
         self.speed = speed
         self.damage = damage
+        self.is_hit = False
         if mode < 0 or mode >= BULLET_TYPE_NUMS:
             self.mode = 0
         else:
@@ -23,9 +23,11 @@ class Bullet:
         elif mode == 1:
             self.bullet = pygame.transform.scale(self.bullet, BULLET2_SIZE)
         if self.vector[0] > 0:
-            self.angle = math.degrees(-math.atan(self.vector[1]/self.vector[0]))
+            self.angle = math.degrees(-math.atan(self.vector[1] / self.vector[0]))
         elif self.vector[0] < 0:
-            self.angle = math.degrees(math.pi - math.atan(self.vector[1]/self.vector[0]))
+            self.angle = math.degrees(
+                math.pi - math.atan(self.vector[1] / self.vector[0])
+            )
         else:
             if self.vector[1] > 0:
                 self.angle = 90
@@ -35,10 +37,10 @@ class Bullet:
 
     def display(self, screen):
         screen.blit(self.bullet, self.pos)
-    
-    def normalize(self): 
-        ss = (self.vector[0]**2 + self.vector[1]**2)**0.5
-        self.vector = [self.vector[0] / ss, self.vector[1]/ss]
+
+    def normalize(self):
+        ss = (self.vector[0] ** 2 + self.vector[1] ** 2) ** 0.5
+        self.vector = [self.vector[0] / ss, self.vector[1] / ss]
 
     def get_pos(self):
         return self.pos
@@ -46,10 +48,7 @@ class Bullet:
     def move(self):
         self.pos[0] += self.vector[0] * self.speed
         self.pos[1] += self.vector[1] * self.speed
-    
+
     def update(self, screen):
         self.display(screen)
         self.move()
-        
-        
-
