@@ -15,8 +15,8 @@ class __Config(object):
         file = open("highscore.txt", "r")
         Lines = file.readlines()
         for i in Lines:
-            a = i[: i.index(":")]
-            b = i[i.index(" ") + 1 :]
+            a = i[: i.index(": ")]
+            b = i[i.index(": ") + 2 :]
             self.highscores.append((a, int(b)))
         self.highscores.sort(key=lambda x: -x[1])
         self.highscores = self.highscores[:HIGHSCORES_AMOUNT]

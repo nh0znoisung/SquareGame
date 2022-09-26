@@ -270,7 +270,7 @@ class Game:
                                 done = True
                             elif event.key == pygame.K_BACKSPACE:
                                 text = text[:-1]
-                            elif event.key != pygame.K_SPACE:
+                            elif event.unicode != ':':
                                 text += event.unicode
                 background_image = pygame.image.load("data/gameover.png")
                 background_size = [400, 400]
