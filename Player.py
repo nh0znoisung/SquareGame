@@ -65,7 +65,8 @@ def initAnim(l, withFlipped: bool):
 
 class Player(pygame.sprite.Sprite):
     class PlayerAnim:
-        def __init__(self, walk, slash, dash, die, swordSlash):
+        def __init__(self, player, walk, slash, dash, die, swordSlash):
+            self.player = player
             self.idle = [[walk[0][0]], [walk[1][0]]]
             self.walk = walk
             self.slash = slash
@@ -95,9 +96,10 @@ class Player(pygame.sprite.Sprite):
                 self.animTime = 0
                 self.animDuration = 1.0
 
-        def goSlash(self,player):
+        def goSlash(self):
             if self.curAnim is not self.slash:
-                if not player.useStamina(50): return
+                if not self.player.useStamina(50):
+                    return
                 self.curAnim = self.slash
                 self.animSpriteOffset = 0
                 self.animTime = 0
@@ -154,9 +156,9 @@ class Player(pygame.sprite.Sprite):
 
             return self.curAnim[self.animFlip][curIdx]
 
-    def __init__(self, initialX, initialY, acceleration=1):
+    def __init__(self, game, initialX, initialY, acceleration=1):
         pygame.sprite.Sprite.__init__(self)
-
+        self.game = game
         #### init animations ####
         walkAnim = initAnim(scaleAnim(getWalk()), withFlipped=True)
         slashAnim = initAnim(scaleAnim(getSlash()), withFlipped=True)
@@ -165,7 +167,7 @@ class Player(pygame.sprite.Sprite):
         swordSlashAnim = initAnim(scaleAnim(getSwordSlash()), withFlipped=True)
         # init player anim object
         self.anim = Player.PlayerAnim(
-            walkAnim, slashAnim, dashAnim, dieAnim, swordSlashAnim
+            self, walkAnim, slashAnim, dashAnim, dieAnim, swordSlashAnim
         )
         self.anim.goIdle()
         ###########################
@@ -179,6 +181,7 @@ class Player(pygame.sprite.Sprite):
         self.stamina = 100.0  # 100 %
 
     def useStamina(self, amount):
+        amount = amount * STAMINA_MULTIPLIER[self.game.level]
         if self.stamina >= amount:
             self.stamina -= amount
             return True
@@ -209,13 +212,13 @@ class Player(pygame.sprite.Sprite):
     def get_pos(self):
         return [self.curX, self.curY]
 
-    def update(self, deltaTime, playermoves, level):
+    def update(self, deltaTime, playermoves):
         self.v = 0
 
         if playermoves["die"]:
             self.anim.goDie()
         elif playermoves["slash"]:
-            self.anim.goSlash(self)
+            self.anim.goSlash()
             if self.anim.slashDone:
                 playermoves["slash"] = False
                 self.anim.goIdle()
@@ -227,7 +230,7 @@ class Player(pygame.sprite.Sprite):
             if playermoves["dash"]:
                 self.v = self.acceleration * (1 - 2 * self.anim.animFlip) * 2
                 self.anim.goDash()
-                if not self.useStamina(250.0*deltaTime) or self.anim.dashDone >= 2 :
+                if not self.useStamina(250.0 * deltaTime) or self.anim.dashDone >= 2:
                     playermoves["dash"] = False
                     self.anim.goIdle()
             else:
@@ -247,4 +250,4 @@ class Player(pygame.sprite.Sprite):
         self.image = self.anim.getSprite(deltaTime)
         self.rect.topleft = (self.curX, self.curY)
 
-        self.recoverStamina(deltaTime, BULLET1_COOLDOWN[level] * 100)
+        self.recoverStamina(deltaTime, BULLET1_COOLDOWN[self.game.level] * 100)

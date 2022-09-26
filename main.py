@@ -417,7 +417,7 @@ class Game:
 
     def spawn_player(self):
         self.player = Player(
-            WIDTH / 2 - PLAYER_SIZE[0] / 2, HEIGHT - 150 - PLAYER_SIZE[1] / 2, 300
+            self, WIDTH / 2 - PLAYER_SIZE[0] / 2, HEIGHT - 150 - PLAYER_SIZE[1] / 2, 300
         )
         self.playerGroup.add(self.player)
 
@@ -435,7 +435,7 @@ class Game:
         self.enemiesGroup.draw(self.screen)
 
         if self.playerGroup:
-            self.player.update(deltaTime, self.playermoves, self.level)
+            self.player.update(deltaTime, self.playermoves)
             self.updateShoot()
             self.playerGroup.draw(self.screen)
             if not self.player.anim.slashDone:
