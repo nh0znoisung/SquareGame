@@ -1,4 +1,3 @@
-from atexit import register
 from locals import *
 
 
@@ -12,14 +11,17 @@ class __Config(object):
     def __init__(self):
 
         self.__dict__["_data"] = self.DEFAULT
-        file = open("highscore.txt", "r")
-        Lines = file.readlines()
-        for i in Lines:
-            a = i[: i.index(":")]
-            b = i[i.index(" ") + 1 :]
-            self.highscores.append((a, int(b)))
-        self.highscores.sort(key=lambda x: -x[1])
-        self.highscores = self.highscores[:HIGHSCORES_AMOUNT]
+        try:
+            with open("highscore.txt", "r") as file:
+                Lines = file.readlines()
+                for i in Lines:
+                    a = i[: i.index(": ")]
+                    b = i[i.index(": ") + 2 :]
+                    self.highscores.append((a, int(b)))
+                self.highscores.sort(key=lambda x: -x[1])
+                self.highscores = self.highscores[:HIGHSCORES_AMOUNT]
+        except:
+            pass
 
     def __getattr__(self, name):
         try:
@@ -51,13 +53,16 @@ class __Config(object):
         name = "Anonymous" if name == "" else name[: self.MAX_NAME_LEN]
 
         self.highscores.append((name, score))
-        file = open("highscore.txt", "a")
-        file.writelines(name + ": " + str(score) + "\n")
-        file.close()
-        # Sort the list
-        self.highscores.sort(key=lambda a: -a[1])
-        # Truncate to HIGHSCORES_AMOUNT items
-        del self.highscores[HIGHSCORES_AMOUNT:]
+        try:
+            with open("highscore.txt", "a+") as file:
+                file.writelines(name + ": " + str(score) + "\n")
+                file.close()
+                # Sort the list
+                self.highscores.sort(key=lambda a: -a[1])
+                # Truncate to HIGHSCORES_AMOUNT items
+                del self.highscores[HIGHSCORES_AMOUNT:]
+        except:
+            pass
 
 
 conf = __Config()

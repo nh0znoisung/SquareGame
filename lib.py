@@ -46,13 +46,13 @@ def get_text_width(text, size):
 
 def draw_background_main():
     """Render the background for main screen."""
-    background = pygame.image.load("data/bg_main.png")
+    background = pygame.image.load(filename("bg_main.png"))
     return background
 
 
 def draw_background_menu():
     """Render the background for menu screen."""
-    background = pygame.image.load("data/bg_menu.png")
+    background = pygame.image.load(filename("bg_menu.png"))
     return background
 
 
