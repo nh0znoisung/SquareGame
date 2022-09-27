@@ -2,15 +2,18 @@ import pygame
 from sound import sound
 
 from locals import *
+import lib
 
 #### loading animation ####
 def getWalk():
-    base = pygame.image.load("data/PlayerAnimation/walk/Player (1).png")
+    base = pygame.image.load(lib.filename("PlayerAnimation/walk/Player (1).png"))
     re = [pygame.Surface(base.get_size(), pygame.SRCALPHA, 32) for _ in range(12)]
     re = [re[i].convert_alpha() for i in range(12)]
     [
         re[i].blit(
-            pygame.image.load("data/PlayerAnimation/walk/Player (%d).png" % (i + 1)),
+            pygame.image.load(
+                lib.filename("PlayerAnimation/walk/Player (%d).png" % (i + 1))
+            ),
             (-3, -13),
         )
         for i in range(12)
@@ -20,27 +23,31 @@ def getWalk():
 
 def getSlash():
     return [
-        pygame.image.load("data/PlayerAnimation/slash/slash%d.png" % i)
+        pygame.image.load(lib.filename("PlayerAnimation/slash/slash%d.png" % i))
         for i in range(7)
     ]
 
 
 def getDash():
     return [
-        pygame.image.load("data/PlayerAnimation/dash/dash%d.png" % i) for i in range(4)
+        pygame.image.load(lib.filename("PlayerAnimation/dash/dash%d.png" % i))
+        for i in range(4)
     ]
 
 
 def getSwordSlash():
     return [
-        pygame.image.load("data/PlayerAnimation/saberslash/saberslash%d.png" % i)
+        pygame.image.load(
+            lib.filename("PlayerAnimation/saberslash/saberslash%d.png" % i)
+        )
         for i in range(7)
     ]
 
 
 def getDie():
     re = [
-        pygame.image.load("data/PlayerAnimation/die/die0%d.png" % i) for i in range(10)
+        pygame.image.load(lib.filename("PlayerAnimation/die/die0%d.png" % i))
+        for i in range(10)
     ]
     return re[:2] + [re[2]] * 3 + re[2:]
 

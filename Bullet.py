@@ -1,6 +1,7 @@
 import pygame
 import math
 from locals import *
+from lib import filename
 
 # ultimate
 
@@ -17,7 +18,9 @@ class Bullet:
             self.mode = 0
         else:
             self.mode = mode
-        self.bullet = pygame.image.load("data/Bullet/Bullet_{}.png".format(self.mode))
+        self.bullet = pygame.image.load(
+            filename("Bullet/Bullet_{}.png".format(self.mode))
+        )
         if mode == 0:
             self.bullet = pygame.transform.scale(self.bullet, BULLET1_SIZE)
         elif mode == 1:

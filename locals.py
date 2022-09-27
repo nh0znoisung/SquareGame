@@ -11,7 +11,6 @@ FONT_FILENAME = "font.ttf"
 
 SOUND_FILES = (
     "explode.wav",
-    "laser.ogg",
     "music.mp3",
     "title.mp3",
     "die.wav",

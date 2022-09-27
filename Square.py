@@ -2,6 +2,7 @@ import random
 import pygame
 import math
 from locals import *
+from lib import filename
 from sound import sound
 
 
@@ -14,7 +15,9 @@ class Square(pygame.sprite.Sprite):
             self.idx = idx
 
         self.size = size
-        self.origimage = pygame.image.load("data/Square/Square_{}.png".format(self.idx))
+        self.origimage = pygame.image.load(
+            filename("Square/Square_{}.png".format(self.idx))
+        )
         self.origimage = pygame.transform.scale(
             self.origimage, (self.size[0], self.size[1])
         )

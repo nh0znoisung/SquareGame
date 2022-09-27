@@ -1,11 +1,12 @@
 import pygame
 from locals import *
+from lib import filename
 
 
 class Shields:
     def __init__(self):
         self.nums = SHIELD_MAX_NUMS
-        self.shield = pygame.image.load("data/shield.png")
+        self.shield = pygame.image.load(filename("shield.png"))
         self.shield = pygame.transform.scale(self.shield, SHIELD_SIZE)
 
     def display(self, screen, idx):
